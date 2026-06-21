@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 2 · Sourced Repository</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 2</p>
+      <h1 class="chapter-title">Sourced Repository</h1>
+      <p class="chapter-subhead">The real codebase this pattern was derived from, described with its actual names so you know exactly what was studied.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Ground Truth</span>
+        <h2>What the Project Is</h2>
+        <p class="section-subhead">Before we abstract anything, here's the concrete thing on disk, named the way its authors named it.</p>
+      </header>
+      <div class="prose">
+        <p>Every chapter after this one uses generalized names so the lessons travel. This chapter is the deliberate exception. The pattern was lifted from a Microsoft sample called the <strong>Sample Level 3 Agentic System</strong>, and to understand what was studied you need to see it as it really is, real project names and all. So for these few pages, the gloves come off and we use the actual identifiers.</p>
+        <p>The sample's use case is <strong>Retailer Impact Evaluation</strong>. A "change event" arrives (some regulatory shift, a supply disruption, a market move), and the system autonomously works out which retailers it affects, then generates a per-retailer impact report through an agent feedback loop, and delivers the finalized reports with no human intervention during execution. It's a proof-of-concept by design: it uses blob polling as an event bus and simplified data models, but the architecture is built so that production swaps (Event Grid, retrieval pipelines, dynamic agent registration) drop in without restructuring.</p>
+        <p>The stack is .NET 10 throughout, orchestrated by <strong>Aspire</strong>. The agents are built on the <strong>Microsoft Agent Framework</strong> (the <code>Microsoft.Agents.AI.OpenAI</code> and Workflows packages), talking to <strong>Azure OpenAI</strong> through <code>ChainedTokenCredential</code> so there are no API keys anywhere, just RBAC. Data lives in <strong>Azure Table Storage</strong> and <strong>Azure Cosmos DB</strong>, the stage-to-stage seam is <strong>Azure Blob Storage</strong>, the UI is <strong>Blazor Server</strong>, and tool access runs over the <strong>Model Context Protocol</strong>. Optional integrations layer in <strong>Agent 365</strong> observability, <strong>Microsoft Purview</strong> governance, <strong>Azure AI Foundry</strong> prompt agents, Microsoft Fabric data agents, and Logic Apps notifications.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Topology</span>
+        <h2>Two Hosts Joined by a Blob Container</h2>
+        <p class="section-subhead">The solution splits at one clean line, and that line is a storage account.</p>
+      </header>
+      <div class="prose">
+        <p>The two halves of the system are two ASP.NET Core projects. <code>ChangeEventEvaluatorHost</code> is the intake workflow: it exposes the REST trigger, runs the first two agents, and writes one blob per matched retailer to the <code>retailer-work-items</code> container. <code>ChangeEventProcessorHost</code> is the processing workflow: a background service polls that container every five seconds, and each new blob launches an independent per-retailer run.</p>
+        <p>Why two projects instead of one? Independent scaling. Intake runs once per change event; processing runs once per affected retailer and is far more expensive. Splitting them at Azure Blob Storage means you can run many <code>ChangeEventProcessorHost</code> instances chewing through retailers in parallel while a single <code>ChangeEventEvaluatorHost</code> handles intake. The blob container is the entire contract between them, which is exactly why the seam is so flexible.</p>
+        <p>The two workflows even use different orchestration styles from the Agent Framework, on purpose. Intake is a fixed two-node graph built with <code>WorkflowBuilder</code>. Processing is a Group Chat built with <code>AgentWorkflowBuilder.CreateGroupChatBuilderWith()</code>. We'll dig into both later; for now just notice that the codebase reaches for the simpler tool when the job is simple and the richer one when agents need to collaborate.</p>
+      </div>
+      <pre class="codeblock"><code class="language-text">SampleL3AgenticSystem/
+├── AppHost/                       Aspire orchestrator — wires every service and resource
+├── ServiceDefaults/               Shared Aspire infra: health checks, OpenTelemetry, resilience
+├── ChangeEventEvaluatorHost/      Intake workflow — REST API + Observer/Evaluation agents
+├── ChangeEventProcessorHost/      Processing workflow — Researcher/Generator/Reviewer Group Chat
+├── SampleMCPServer/               MCP server exposing retailer-data query tools
+├── DemoUI/                        Blazor Server frontend for triggering and monitoring
+├── SampleL3AgenticSystem.Shared/  Models, abstractions, storage services, DTOs
+└── M365DeclarativeAgent/          Microsoft 365 Copilot declarative agent (no code, API plugin)</code></pre>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Cast</span>
+        <h2>The Five Agents</h2>
+        <p class="section-subhead">Two live in intake and run as workflow executors; three live in processing and collaborate in a Group Chat.</p>
+      </header>
+      <div class="prose">
+        <p>The intake host runs two agents as <code>ReflectingExecutor</code> nodes wired together with <code>WorkflowBuilder</code>. <code>ChangeEventObserverAgent</code> normalizes the raw event and pulls out its key implications. <code>ChangeEventEvaluationAgent</code> then queries retailer data through MCP tools, decides which retailers match every stated criterion, and writes a <code>RetailerWorkItem</code> blob for each one. These two pass typed messages to each other and route results with <code>context.SendMessageAsync()</code>.</p>
+        <p>The processing host runs three agents as <code>ChatClientAgent</code> instances inside a Group Chat managed round-robin by a custom <code>ChangeEventGroupChatManager</code>. <code>Researcher</code> gathers economic-impact research for one retailer. <code>ReportGenerator</code> turns that research into a Markdown report. <code>ReportReviewer</code> is the quality gate: it answers either <code>APPROVED</code>, which ends the chat, or with revision feedback, which sends the team around for another pass. All three talk in natural language in the shared conversation, so there's no typed routing between them at all.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>ChangeEventObserverAgent</h3>
+          <p>Intake, executor node. Normalizes the raw <code>ChangeEventTrigger</code> into an enriched <code>ChangeEvent</code> with key implications. No tools.</p>
+        </div>
+        <div class="info-card">
+          <h3>ChangeEventEvaluationAgent</h3>
+          <p>Intake, executor node. Uses MCP query tools to match retailers against every criterion, then writes one <code>RetailerWorkItem</code> blob per match.</p>
+        </div>
+        <div class="info-card">
+          <h3>Researcher</h3>
+          <p>Processing, Group Chat. Gathers impact research via MCP tools. Optionally runs as an Azure AI Foundry prompt agent instead of direct Azure OpenAI.</p>
+        </div>
+        <div class="info-card">
+          <h3>ReportGenerator</h3>
+          <p>Processing, Group Chat. Writes and revises the Markdown impact report from the research in the shared conversation.</p>
+        </div>
+        <div class="info-card">
+          <h3>ReportReviewer</h3>
+          <p>Processing, Group Chat. The quality gate. Replies <code>APPROVED</code> to end the chat, or gives revision feedback to continue the loop.</p>
+        </div>
+        <div class="info-card">
+          <h3>The non-agents</h3>
+          <p><code>BlobTriggerService</code>, <code>ProgressReporter</code>, and <code>SaveReportAsync()</code> are plain infrastructure: polling, cross-process status, and persistence. No LLM calls.</p>
+        </div>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Supporting Code</span>
+        <h2>The Shared Library and the Edges</h2>
+        <p class="section-subhead">A lot of the interesting machinery sits outside the agents, in code both hosts lean on.</p>
+      </header>
+      <div class="prose">
+        <p><code>SampleL3AgenticSystem.Shared</code> is where the reusable pieces live. It holds the domain records in <code>Models.cs</code> (<code>ChangeEvent</code>, <code>RetailerProfile</code>, <code>RetailerWorkItem</code>, <code>RetailerReport</code>, and friends), the <code>IChatClientProvider</code> abstraction over the model client, the <code>TableStorageService</code>, and the file that does a lot of quiet heavy lifting: <code>ChatClientPipelineExtensions</code>. That last one defines the fluent <code>IChatClient</code> wrappers (<code>.WithRateLimitRetry</code>, <code>.WithAgent365Baggage</code>, <code>.WithPurview</code>, <code>.WithOpenTelemetry</code>, <code>.WithCompaction</code>) that both hosts use to assemble their agents. Chapter 11 is essentially a close reading of that one file.</p>
+        <p><code>SampleMCPServer</code> is a standalone MCP server, built with <code>ModelContextProtocol.AspNetCore</code> and Streamable HTTP transport, that exposes the retailer-data query tools plus the workflow-control tools the declarative agent uses. <code>ServiceDefaults</code> is the standard Aspire shared-infra project (health checks, OpenTelemetry wiring, resilience handlers). <code>AppHost</code> is the Aspire orchestrator that ties everything together, which is where the next-to-last detail lives.</p>
+        <p>On the edges, <code>DemoUI</code> is a Blazor Server app for submitting mock events and watching the agents work, and <code>M365DeclarativeAgent</code> is a code-free Microsoft 365 Copilot agent that routes through <code>SampleMCPServer</code> to submit events and check status. Both are just triggers; the system could as easily be driven by a service that continuously scans for real events.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Bridge to the Pattern</span>
+        <h2>What the Rest of the Guide Generalizes</h2>
+        <p class="section-subhead">Now that you've seen the real thing, here's the translation key for everything that follows.</p>
+      </header>
+      <div class="prose">
+        <p>From here on, the retailer-specific names step aside so the pattern can stand on its own. The two hosts become the Intake Service and the Processing Service. <code>ChangeEvent</code> becomes an inbound event, <code>RetailerProfile</code> becomes a target entity, <code>RetailerWorkItem</code> becomes a work item, and the report becomes a deliverable. The five agents keep their roles but lose the domain flavor: a normalizer and a selector in intake; a researcher, a generator, and a reviewer in processing.</p>
+        <p>What does <em>not</em> get generalized is the Microsoft stack, and that's a deliberate call. The Agent Framework, MCP, Aspire, Agent 365, Purview, Azure AI Foundry, OpenTelemetry: those integrations are part of the pattern, not incidental detail. When Chapter 11 talks about wrapping an agent's client for Agent 365 identity telemetry, it names <code>Agent365BaggageChatClient</code> and the <code>.WithAgent365Baggage</code> extension, because that's the actual technique worth learning. Generalizing those away would leave you with a vaguer, less useful guide.</p>
+        <p>With the real codebase in view and the translation key in hand, the next chapter covers what you'll want installed and understood before building your own version.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="01-introduction.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 1</span>
+        <span class="chapter-nav__title">Introduction</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="03-prerequisites.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 3</span>
+        <span class="chapter-nav__title">Prerequisites</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

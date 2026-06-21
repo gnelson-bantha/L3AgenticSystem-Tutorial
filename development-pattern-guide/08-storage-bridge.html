@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 8 · The Storage Bridge for Parallel Scale</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 8</p>
+      <h1 class="chapter-title">The Storage Bridge for Parallel Scale</h1>
+      <p class="chapter-subhead">Why a plain blob container sits between the two halves of the system, and how it turns one event into many parallel runs.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Seam</span>
+        <h2>The Most Important Box Is Almost Empty</h2>
+        <p class="section-subhead">It's just a container of files, and that humbleness is exactly the source of its power.</p>
+      </header>
+      <div class="prose">
+        <p>We keep coming back to the seam, and now we stand on it. The bridge between intake and processing is a blob container. That's it. Intake drops a work item into it; processing fishes work items out of it. There's no message bus to configure, no shared library, no direct call between the two services. Two stages, one folder of files, complete ignorance of each other.</p>
+        <p>It's worth being precise about what this humble container actually buys, because every benefit traces back to one property: the work item is <em>durable</em> the instant it's written. Once a work item is a blob, intake's job is genuinely over, and the work survives anything. Restart processing, deploy a new version, crash a node, and the work items are still sitting there waiting. The container is also a natural backpressure valve: if work arrives faster than processing can chew through it, items just accumulate, no one falls over, and the backlog drains when capacity frees up. And because the contract is "a work item is a blob," you can run as many processing instances as you like against the same container.</p>
+      </div>
+      <div class="pull-quote">
+        <p>Put durable storage on the seam between your stages, and a crash stops being a catastrophe. It becomes a pause.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Pickup</span>
+        <h2>Polling as a Stand-In for Events</h2>
+        <p class="section-subhead">A background service watches the container and turns each new file into a running pipeline.</p>
+      </header>
+      <div class="prose">
+        <p>Something has to notice new work items and start runs. In this system that's a background service that polls the container on a short interval. Polling is a deliberately simple stand-in for a real event subscription; we'll talk about the production version at the end of the chapter. What it does on each pass is the interesting part: for every pending item, it <em>claims</em> the item by moving the blob into a separate processing container, then launches a run without waiting for it to finish.</p>
+        <p>Those two moves are doing a lot. The claim-by-move is how two processing instances avoid grabbing the same work item: once a blob has moved out of the pending container, no one else sees it as pending. And launching without awaiting is what makes the system parallel. The poller fires off run after run, each on its own, so ten work items become ten pipelines running side by side instead of a queue of ten waiting their turn.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">public sealed class WorkQueuePoller(
+    BlobBridge bridge, CollaborationRunner runner,
+    AgentPool pool, EventTracker tracker) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stopping)
+    {
+        await pool.WaitUntilReadyAsync(stopping);  // never poll before agents exist
+        await bridge.RecoverOrphansAsync();        // re-claim anything a crash stranded
+
+        while (!stopping.IsCancellationRequested)
+        {
+            await foreach (var name in bridge.ListPendingAsync(stopping))
+            {
+                // The claim IS the move: items in the processing container are no
+                // longer visible to any other instance polling for pending work.
+                var item = await bridge.ClaimAsync(name);
+                if (item is null) continue;
+                tracker.MarkInFlight(item.CorrelationId);
+
+                // Fire and forget: do NOT await. This is where parallelism happens.
+                _ = Task.Run(async () =>
+                {
+                    try     { await runner.RunAsync(item, stopping); }
+                    finally { tracker.MarkCompleted(item.CorrelationId); }
+                }, stopping);
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(5), stopping);
+        }
+    }
+}</code></pre>
+      <div class="prose">
+        <p>Two guardrails bracket the loop. The poller waits until the agent pool is ready before it polls at all, so a slow startup never causes a work item to be claimed and then dropped because the agents weren't built yet. And it recovers orphans before the first poll, which is the next section.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Resilience</span>
+        <h2>Surviving Crashes With Orphan Recovery</h2>
+        <p class="section-subhead">Claiming an item by moving it leaves a clean trail, and that trail is what makes recovery trivial.</p>
+      </header>
+      <div class="prose">
+        <p>Think about what happens if a processing instance dies mid-run. The work item it was handling has already moved into the processing container (it got claimed), but the run never finished. If nothing intervened, that item would sit in the processing container forever, claimed by a process that no longer exists. An orphan.</p>
+        <p>The claim-by-move pattern makes the fix almost free. Anything sitting in the processing container at startup must be an orphan, because a healthy instance would have finished it and removed it. So on startup, before polling, the poller sweeps the processing container and moves everything back to pending. Those items get picked up and run again. A crash costs you a restart, not a lost work item.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// Anything still in the processing container at startup was claimed by an instance
+// that died before finishing. Move it back to pending so it gets picked up again.
+public async Task RecoverOrphansAsync()
+{
+    await foreach (var orphan in ListProcessingAsync())
+    {
+        await MoveAsync(orphan, from: ProcessingContainer, to: PendingContainer);
+    }
+}</code></pre>
+      <div class="prose">
+        <p>The other thing worth a look is how the system counts what's happening across all those parallel runs. Because many runs touch the counters at once, the tally has to be thread-safe, so it uses atomic increments rather than locks. A small <code>EventTracker</code> keeps, per event, how many work items were detected, how many are in flight, and how many have completed. That's what lets the UI later say "7 of 10 done" without any of the parallel runs tripping over each other.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">public sealed class EventTracker
+{
+    private int _detected, _inFlight, _completed;
+
+    public void MarkDetected()        =&gt; Interlocked.Increment(ref _detected);
+    public void MarkInFlight(string id) =&gt; Interlocked.Increment(ref _inFlight);
+
+    public void MarkCompleted(string id)
+    {
+        Interlocked.Decrement(ref _inFlight);   // atomic: safe under heavy parallelism
+        Interlocked.Increment(ref _completed);
+    }
+}</code></pre>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Honest Trade-offs</span>
+        <h2>What You'd Change for Production</h2>
+        <p class="section-subhead">The seam is the real design; polling a blob container is just the cheapest thing that honors it.</p>
+      </header>
+      <div class="prose">
+        <p>It's worth being upfront: polling a container every few seconds is not how you'd run this at serious scale. It adds latency (a work item can sit for up to the poll interval before anyone notices it) and it's chattier than it needs to be. The sample uses it because it's the simplest thing that proves the architecture, and proving the architecture is the goal.</p>
+        <p>The reason this is fine is that the seam, not the polling, is the design. The contract is "work items live in durable storage, and something picks them up." Swap the blob poll for a real event subscription (a storage-event trigger, a service-bus queue, a managed event grid) and nothing on either side of the seam has to change. Intake still writes durable work items; processing still claims and runs them. You'd keep the claim-by-move and orphan-recovery ideas, because durable queues have their own version of the same concerns. The poll is an implementation detail behind a deliberately stable interface.</p>
+      </div>
+      <div class="callout">
+        <span class="callout-label">The portable takeaway</span>
+        <p>Design the seam as "durable work plus a pickup mechanism," then pick the cheapest pickup that fits where you are. Start with polling to get the architecture right, and graduate to a real event source without touching either stage. The decoupling is what's valuable; the transport is swappable.</p>
+      </div>
+      <div class="prose">
+        <p>We've now followed a work item from the selector's pen all the way to a running pipeline on the other side of the bridge. The obvious next question is what actually happens inside one of those runs. The answer is three agents in a shared conversation, and that's the next chapter.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="07-tool-access-mcp.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 7</span>
+        <span class="chapter-nav__title">Tool Access Through a Protocol Boundary</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="09-group-chat-orchestration.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 9</span>
+        <span class="chapter-nav__title">The Collaboration Stage</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 7 · Tool Access Through a Protocol Boundary</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 7</p>
+      <h1 class="chapter-title">Tool Access Through a Protocol Boundary</h1>
+      <p class="chapter-subhead">Giving agents the tools they need over the Model Context Protocol instead of hard-wiring functions into them.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Boundary</span>
+        <h2>Why Tools Live in Another Process</h2>
+        <p class="section-subhead">The selector agent just called some query tools; here's why those tools deliberately live across a wire.</p>
+      </header>
+      <div class="prose">
+        <p>In the last chapter the selector agent asked which targets an event affects, and it answered by calling tools. The obvious way to give an agent a tool is to hand it a C# delegate: write a method, register it as a function, done. That works, and for a quick prototype it's fine. This system does something deliberately heavier: it puts the tools in a separate server and has the agents reach them over the Model Context Protocol. The extra ceremony buys a boundary, and the boundary is the point.</p>
+        <p>MCP is a standard protocol for exposing tools to agents. One side is a server that publishes a catalog of tools; the other side is a client (an agent) that discovers and calls them, without knowing or caring where they run or how they're implemented. Because that contract is a protocol rather than a method signature, the tools can live in another process, be written by another team, be swapped for a real data backend, or be reused by something that isn't even an agent. None of those changes touch the agents. That is the freedom you're buying.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>Independent change</h3>
+          <p>Tools evolve behind the protocol. Swap a stub data source for a production database, add a new query, fix a bug, and the agents keep calling the same named tools, unchanged and unaware.</p>
+        </div>
+        <div class="info-card">
+          <h3>Shared reuse</h3>
+          <p>The same tool server feeds the selector agent, the research agent, and the external conversational front door. One catalog, many consumers, no duplication.</p>
+        </div>
+        <div class="info-card">
+          <h3>A place to govern</h3>
+          <p>A boundary is a natural checkpoint. It's where you decide which callers see which tools, which is exactly the filtering trick at the end of this chapter.</p>
+        </div>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Server</span>
+        <h2>A Tool Server in Practice</h2>
+        <p class="section-subhead">It's an ordinary ASP.NET host that publishes a few annotated methods as tools.</p>
+      </header>
+      <div class="prose">
+        <p>The tool server is its own small project. It uses the MCP server package for ASP.NET, picks the Streamable HTTP transport (a long-lived HTTP connection agents can stream over), and registers a class whose methods are the tools. There's almost no ceremony: annotate the host, annotate the methods, map the endpoint.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddMcpServer()
+    .WithHttpTransport()          // Streamable HTTP: a durable connection to stream over
+    .WithTools&lt;TargetQueryTools&gt;();
+
+var app = builder.Build();
+app.MapMcp();                     // publish the MCP endpoint
+app.Run();</code></pre>
+      <div class="prose">
+        <p>The tools themselves are just methods with a couple of attributes. Each one gets a description, and that description is not decoration: it's what the model reads to decide when to call the tool, so it's written for the model's benefit. The sample exposes a small family of target queries (all targets, by region, by size, by category, and a combined region-and-size query), each backed by the entity store.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">[McpServerToolType]
+public sealed class TargetQueryTools(EntityStore store)
+{
+    [McpServerTool, Description("List every tracked target.")]
+    public Task&lt;IReadOnlyList&lt;TargetProfile&gt;&gt; QueryAllTargets()
+        =&gt; store.GetAllAsync();
+
+    [McpServerTool, Description("Find targets located in a given region.")]
+    public Task&lt;IReadOnlyList&lt;TargetProfile&gt;&gt; QueryTargetsByRegion(string region)
+        =&gt; store.GetByRegionAsync(region);
+
+    [McpServerTool, Description("Find targets at or above a minimum size.")]
+    public Task&lt;IReadOnlyList&lt;TargetProfile&gt;&gt; QueryTargetsByMinSize(decimal minSize)
+        =&gt; store.GetByMinSizeAsync(minSize);
+}</code></pre>
+      <div class="prose">
+        <p>That's the whole server. Notice what's not here: nothing about agents, nothing about the workflow, no awareness of who's calling. The server's only concern is "here are some tools and what they do." Keeping it that ignorant is what lets it be reused so freely.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Client Side</span>
+        <h2>Handing Tools to an Agent</h2>
+        <p class="section-subhead">On the agent side, a discovered MCP tool is just another function the model can call.</p>
+      </header>
+      <div class="prose">
+        <p>An agent connects to the server, asks what tools it offers, and binds them. The connection is wrapped in a small resilient helper so that if the link drops (servers restart, networks blip) it reconnects rather than failing the run. That resilience matters because these are long-lived, autonomous runs; you don't want a transient hiccup to sink an hour of work.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// A reconnecting wrapper over the MCP connection, so a dropped link self-heals
+// instead of killing a long-running autonomous run.
+var connection = new ResilientMcpConnection(toolServerUri);
+await connection.ConnectAsync();
+
+IList&lt;McpClientTool&gt; tools = await connection.ListToolsAsync();</code></pre>
+      <div class="prose">
+        <p>The elegant part is the last step. A discovered tool comes back as an <code>McpClientTool</code>, which derives from the framework's <code>AIFunction</code> type. That means a remote tool, living in another process and reached over a protocol, drops into an agent in exactly the same place a local C# function would. The agent can't tell the difference, and doesn't need to.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// McpClientTool : AIFunction, so remote tools bind exactly like local ones.
+var selector = new ChatClientAgent(client, new ChatClientAgentOptions
+{
+    Name = "SelectorAgent",
+    Instructions = selectorInstructions,
+    ChatOptions = new ChatOptions { Tools = [.. tools] }
+});</code></pre>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Least Privilege</span>
+        <h2>Hiding the Controls With a Tool Filter</h2>
+        <p class="section-subhead">The server publishes more than the agents should see, so the agents get a filtered view.</p>
+      </header>
+      <div class="prose">
+        <p>Here's where the boundary earns its keep a second time. The same tool server also publishes a few workflow-control tools (submit an event, get a run's status, list runs) because the external conversational front door needs them to drive the system from the outside. But the internal agents must never call those. A research agent that could submit new events or poke at workflow status is a research agent that can wander off the rails, or worse, drive the system in a loop.</p>
+        <p>The fix is a filter applied on the client side, before the tools are bound to an internal agent. The agent simply never receives the control tools, so it can't call what it can't see.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// The control tools belong to the external front door, not the internal agents.
+// Filter them out before binding, so an internal agent literally cannot see them.
+var dataTools = tools
+    .Where(McpToolFilter.ExcludeWorkflowControlTools)
+    .ToList();
+
+var research = new ChatClientAgent(client, new ChatClientAgentOptions
+{
+    Name = "ResearchAgent",
+    Instructions = researchInstructions,
+    ChatOptions = new ChatOptions { Tools = [.. dataTools] }
+});</code></pre>
+      <div class="important-banner">
+        <span class="callout-label">Least privilege for agents</span>
+        <p>An autonomous agent will use any tool you give it, which means the tools you give it <em>are</em> its permissions. Publishing a broad catalog at the server and then handing each agent only the slice it needs is least privilege applied to agents. The protocol boundary is what makes that slicing possible, because filtering happens at the seam rather than being tangled into agent logic.</p>
+      </div>
+      <div class="prose">
+        <p>One more thing this boundary enables, worth a sentence before we move on: because tools are just an MCP catalog, you can point an agent at additional servers. The sample can optionally attach a separate analytics data agent exposed over its own MCP endpoint, and the binding code looks identical. We'll revisit that in the extending chapter.</p>
+        <p>The selector and research agents now have their data. The work items the selector produced are sitting in the storage bridge, untouched. That bridge is the structural heart of the whole system, and it's finally time to give it the chapter it deserves.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="06-intake-workflow-graph.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 6</span>
+        <span class="chapter-nav__title">The Intake Stage</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="08-storage-bridge.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 8</span>
+        <span class="chapter-nav__title">The Storage Bridge for Parallel Scale</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

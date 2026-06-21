@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 6 · The Intake Stage</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 6</p>
+      <h1 class="chapter-title">The Intake Stage: A Linear Workflow Graph</h1>
+      <p class="chapter-subhead">A small, fixed agent pipeline that turns one raw event into many concrete units of work.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Tool Choice</span>
+        <h2>When the Job Is a Straight Line</h2>
+        <p class="section-subhead">Not every multi-agent task needs agents debating; sometimes you just need step one, then step two.</p>
+      </header>
+      <div class="prose">
+        <p>The composition root handed us configured agents. Now we put the first two to work. Intake has a job with a fixed shape: take the incoming event, clean it up, then figure out which targets it affects. Those two steps always happen in that order, every time. There's no judgment call about who should act next, no back-and-forth, no looping. It's a straight line.</p>
+        <p>That shape matters, because the Agent Framework gives you more than one way to coordinate agents, and picking the right one keeps the code honest. When agents need to collaborate and the path isn't fixed, you reach for a Group Chat where a manager decides who speaks (that's the processing stage, Chapter 9). When the path <em>is</em> fixed, you reach for an explicit workflow graph: nodes wired with edges, messages flowing along them. Intake is the second case, so we build it with <code>WorkflowBuilder</code> and keep it dead simple.</p>
+      </div>
+      <div class="callout">
+        <span class="callout-label">A small rule worth keeping</span>
+        <p>Match the orchestration to the determinism of the task. A predictable sequence deserves a graph you can read at a glance; an open-ended collaboration deserves a manager that can adapt. Using a Group Chat for a straight line buries a simple thing in machinery, and using a fixed graph for an open-ended task fights the problem. Intake earns the simpler tool.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Graph</span>
+        <h2>Two Nodes and an Edge</h2>
+        <p class="section-subhead">Each step is an executor; an edge connects them; typed messages flow from one to the next.</p>
+      </header>
+      <div class="prose">
+        <p>In the Agent Framework, a node in a workflow graph is an <em>executor</em>: a unit that receives a typed message, does something, and optionally sends a message onward. You build one by deriving from <code>ReflectingExecutor</code> and declaring which message types it handles with <code>IMessageHandler</code>. The graph itself is just executors joined by edges. Here's the whole intake pipeline, assembled.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// Two executors, one edge. That is the entire intake workflow.
+var normalizer = new NormalizerExecutor(agentPool);
+var selector   = new SelectorExecutor(agentPool, bridge);
+
+var workflow = new WorkflowBuilder(normalizer)   // normalizer is the entry node
+    .AddEdge(normalizer, selector)               // its output flows to selector
+    .Build();
+
+// A run starts when the REST trigger hands in a freshly received event.
+await workflow.RunAsync(new InboundEvent(correlationId, rawText));</code></pre>
+      <div class="prose">
+        <p>The first executor normalizes. It takes the raw event, asks the normalizer agent to enrich it (pull out the key implications, tidy the structure), and then sends a typed <code>WorkRequest</code> down the edge. The thing to notice is <code>context.SendMessageAsync</code>: that's how an executor passes a result to whatever the graph wires up next. The executor doesn't know or care who receives it; the edge decides.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">internal sealed class NormalizerExecutor
+    : ReflectingExecutor&lt;NormalizerExecutor&gt;, IMessageHandler&lt;InboundEvent&gt;
+{
+    public async ValueTask HandleAsync(InboundEvent message, IWorkflowContext context)
+    {
+        var agent    = agentPool.GetNormalizer();
+        var enriched = await agent.EnrichAsync(message.RawText);
+
+        // Pass the enriched event to the next node. The edge decides who that is.
+        await context.SendMessageAsync(
+            new WorkRequest(message.CorrelationId, enriched));
+    }
+}</code></pre>
+      <div class="prose">
+        <p>That's the entire mechanism. Typed messages in, typed messages out, edges deciding the flow. If you later needed a third step (say, a deduplication pass between normalize and select), you'd add an executor and an edge, and nothing else would change. The graph stays legible because it's literally a list of nodes and the edges between them.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Fan-Out</span>
+        <h2>From One Event to Many Work Items</h2>
+        <p class="section-subhead">The second node is where a single event explodes into the pile of independent jobs the rest of the system feeds on.</p>
+      </header>
+      <div class="prose">
+        <p>The selector executor is where intake earns its keep. It runs the selector agent, which has the tool-server query tools bound to it (those come from the next chapter), and asks: of all the targets we track, which ones does this event actually affect, against every stated criterion? The agent reasons over the data the tools return and produces a list of matches. Then the executor does the most important thing intake does: it writes one work item per match into the storage bridge.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">internal sealed class SelectorExecutor
+    : ReflectingExecutor&lt;SelectorExecutor&gt;, IMessageHandler&lt;WorkRequest&gt;
+{
+    public async ValueTask HandleAsync(WorkRequest message, IWorkflowContext context)
+    {
+        // The selector agent queries target data over MCP and decides who matches.
+        var selector = agentPool.GetSelector();
+        var targets  = await selector.SelectTargetsAsync(message.Event);
+
+        // Fan-out: one independent work item per matched target, keyed under the
+        // correlation id so the whole event's output groups together in the bridge.
+        foreach (var target in targets)
+        {
+            var item = new WorkItem(message.CorrelationId, target, message.Event);
+            await bridge.WriteAsync($"{message.CorrelationId}/{target.Id}.json", item);
+        }
+    }
+}</code></pre>
+      <div class="prose">
+        <p>This is the fan-out that the whole parallel design depends on. One event in, many work items out. Each work item is self-contained: it carries the correlation id, the target it's about, and the event context, so the processing stage can pick it up and run with zero knowledge of intake. The blob path encodes the correlation id as a prefix, which means every work item born from one event lands under the same folder, a small detail that makes recovery and tracking much easier later.</p>
+        <p>Notice what the selector does <em>not</em> do: it doesn't call the processing stage, doesn't start any runs, doesn't wait for anything. It writes blobs and finishes. The fan-out is expressed purely as data sitting in storage.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Handoff</span>
+        <h2>Why Intake Stops at the Storage Edge</h2>
+        <p class="section-subhead">The most important thing about this stage is the line it refuses to cross.</p>
+      </header>
+      <div class="prose">
+        <p>It would be easy to make intake "helpful" by having it kick off processing for each work item it creates. Don't. The moment intake calls into processing, you've welded the two stages together: they now have to be deployed together, scaled together, and they fail together. Every reason we split the system in the first place evaporates.</p>
+        <p>So intake stops at the storage edge on purpose. Its contract with the rest of the system is exactly one thing: work items appear in the bridge. What reads them, when, and how many at a time is none of its business. That restraint is what keeps intake cheap and fast (it runs once per event and exits) while processing stays free to scale on its own terms.</p>
+        <p>Two threads run out of this chapter. One is the tools the selector used to query target data, which deserve a close look because they live behind a protocol boundary on purpose. The other is the storage bridge those work items landed in. We'll take the tools first, since the selector just leaned on them, and come back to the bridge in Chapter 8.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="05-composition-root.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 5</span>
+        <span class="chapter-nav__title">The Composition Root</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="07-tool-access-mcp.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 7</span>
+        <span class="chapter-nav__title">Tool Access Through a Protocol Boundary</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

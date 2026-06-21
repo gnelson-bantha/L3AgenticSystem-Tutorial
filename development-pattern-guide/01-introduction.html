@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 1 · Introduction</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 1</p>
+      <h1 class="chapter-title">Introduction</h1>
+      <p class="chapter-subhead">What "Level 3" autonomy really means, and the shape of the pattern you're about to build.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Idea</span>
+        <h2>Autonomy at Level 3</h2>
+        <p class="section-subhead">Most AI features answer a question and stop. This one decides, acts, and finishes the job on its own.</p>
+      </header>
+      <div class="prose">
+        <p>Picture the difference between a chatbot and a colleague. A chatbot waits for you to ask something, answers, and waits again. You're the one holding the thread, deciding what happens next, stitching the steps together. A colleague is different. You hand them a goal, they go figure out the steps, they make judgment calls along the way, and they come back when the work is actually done. That second thing is what "Level 3" autonomy means, and it's the whole point of the system this guide teaches you to build.</p>
+        <p>It helps to put the levels side by side. At Level 1, the model is a smart autocomplete: it suggests, you decide. At Level 2, it can call tools, but a human still drives the loop and signs off on each move. At Level 3, the agent owns the loop. It reads the situation, picks the tools, judges the results, decides whether the work is good enough, and only hands back a finished product. No human sits in the middle of execution tapping "approve" between every step.</p>
+        <p>That sounds great until you try to build it, and then the hard questions show up all at once. If no human is in the loop, what stops an agent from confidently producing garbage? How do you run a hundred of these at the same time without them stepping on each other? How do you watch what they're doing in production when each one is making its own decisions? Those questions are exactly what the pattern in this guide answers, and none of the answers are "add a human checkpoint," because that would drop you right back to Level 2.</p>
+      </div>
+      <div class="callout">
+        <span class="callout-label">The working example</span>
+        <p>Throughout the guide we'll lean on one concrete scenario to keep things grounded: an event arrives describing some change in the world, and the system has to figure out which of many tracked entities are affected, then produce a reviewed written assessment for each one. It runs start to finish without anyone watching. The next chapter describes the real repository this is drawn from; everything after that generalizes the pattern so you can point it at your own problem.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Pattern</span>
+        <h2>The Shape of an Autonomous Pipeline</h2>
+        <p class="section-subhead">Here's the whole idea in one breath, before we spend sixteen chapters earning it.</p>
+      </header>
+      <div class="prose">
+        <p>Strip away the domain and the pattern is this: an autonomous, multi-stage agent pipeline whose stages are decoupled by durable storage, fanned out for parallelism, and kept honest by a bounded generate-and-review loop, with every cross-cutting concern bolted on as composable middleware rather than baked into the agents. That's a mouthful, so let's take it apart piece by piece, because each clause is a decision you'll be making in your own system.</p>
+        <p><strong>Multi-stage.</strong> The work splits naturally into a cheap, fast intake phase (figure out what needs doing) and an expensive, slow processing phase (actually do it, well). Those two phases have completely different shapes and completely different scaling needs, so we run them as separate services instead of one monolith.</p>
+        <p><strong>Decoupled by durable storage.</strong> Between the two phases sits a plain storage container. Intake writes work into it; processing reads work out of it. Neither one calls the other directly. That seam is what lets the two halves scale, deploy, and fail independently, and it's the difference between a demo and something that survives a crash.</p>
+        <p><strong>Fanned out for parallelism.</strong> Intake doesn't produce one big job, it produces many small ones, one per affected entity. Each lands as its own item in storage, and the processing side picks them up and runs them at the same time. Ten affected entities means ten pipelines running in parallel, not one pipeline grinding through ten in a row.</p>
+        <p><strong>Bounded generate-and-review.</strong> Inside the processing stage, the agents don't just produce output and trust it. One agent drafts, another reviews and can send it back for another pass. The loop self-corrects, which is how you get quality without a human gate. And it's <em>bounded</em>: there's a hard cap on how many times it can go around, so an agent that can never satisfy its reviewer still terminates instead of looping forever.</p>
+        <p><strong>Composable middleware.</strong> Identity telemetry, content governance, distributed tracing, retry, context management: none of that lives in the agents. Each one is a thin wrapper around the agent's model client, snapped on like a Lego brick. You can run the exact same agent code bare on your laptop and fully instrumented in production, just by changing which wrappers are present.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>Why this shape</h3>
+          <p>Long-running autonomous work is unreliable as one in-process blob. Stages scale differently, agents drift without a quality gate, and you need governance and telemetry without rewriting agent logic. The pattern answers all three at once.</p>
+        </div>
+        <div class="info-card">
+          <h3>What it trades off</h3>
+          <p>A storage seam buys independent scaling and crash recovery but adds eventual consistency and a little latency. A round-robin review loop is simpler than an explicit message graph but gives up fine-grained routing. A hard cap guarantees termination but can yield an unfinished draft you have to surface honestly.</p>
+        </div>
+        <div class="info-card">
+          <h3>What you get</h3>
+          <p>True parallel processing, one codebase that runs bare locally and fully observable in production, and tool and model backends you can swap without touching orchestration. The cost is more moving parts and a storage contract you have to keep stable.</p>
+        </div>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Two Halves</span>
+        <h2>Two Stages and One Storage Seam</h2>
+        <p class="section-subhead">Everything in the guide hangs off this one picture, so it's worth burning into memory now.</p>
+      </header>
+      <div class="prose">
+        <p>If you remember nothing else from this chapter, remember the seam. The system is two services that never speak to each other directly. They speak through a storage container, and that indirection is load-bearing.</p>
+        <p>The first service is the <strong>intake stage</strong>. It takes a raw incoming event, has an agent normalize and enrich it, then has a second agent query a data store to decide which entities the event actually affects. For each match, it writes one small work item into a blob container. That's its whole job: turn one vague event into a pile of concrete, independent units of work. It's a short, fixed pipeline, so we'll build it as a simple linear graph.</p>
+        <p>The second service is the <strong>processing stage</strong>. It watches that blob container, and every time a new work item shows up, it spins up an independent run to handle it. Each run is a small team of agents (a researcher, a writer, a reviewer) talking in a shared conversation until the reviewer signs off. When they're done, the result gets persisted and the world gets notified. Because each work item gets its own run, the processing stage is doing many of these at once.</p>
+        <p>The reason these are two separate services and not two functions in one process is the thing we keep coming back to: they're different animals. Intake is quick and runs once per event. Processing is slow, token-hungry, and runs once per affected entity. Splitting them at the storage seam means you can run one intake instance and ten processing instances, or restart processing without touching intake, or replace the storage poll with a real event subscription later, all without renegotiating anything between the two. We'll spend Chapter 8 entirely on that seam because it earns the attention.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Map</span>
+        <h2>How the Rest of the Guide Is Laid Out</h2>
+        <p class="section-subhead">A quick tour of where we're headed, so each chapter lands in a slot you already have a place for.</p>
+      </header>
+      <div class="prose">
+        <p>The guide moves roughly in build order. First the framing: the next chapter walks the real repository this pattern came from (using its real names, the one place we do that), then prerequisites, then a clickable architecture map you can poke at.</p>
+        <p>After that come the pattern chapters, which are the heart of it. We start at the composition root, where the whole thing gets wired together, then build the intake stage, then the tool boundary that feeds the agents data over the Model Context Protocol. We cross the storage seam, build the group-chat processing stage, and add the self-correcting review loop that makes the output trustworthy. From there we get into the cross-cutting machinery: the middleware stack that adds Agent 365 identity telemetry, Microsoft Purview governance, and OpenTelemetry tracing around each agent; the compaction pipeline that keeps long conversations inside the context window; and the correlation id that lets you trace one event across two processes.</p>
+        <p>The last stretch is about living with the system: how a human can re-open a finished deliverable and re-run the same agents, how to extend the system with new agents and tools, and how to ship the whole thing to Azure with Aspire. Then an appendix of references for every piece of the stack.</p>
+        <p>One note before we start: from the next chapter on, the application's own names get generalized so the pattern stays portable. The Microsoft pieces it integrates with, Agent 365, Purview, Azure AI Foundry, the Agent Framework, MCP, Aspire, do not get generalized, because those integrations are a real part of the pattern and pretending otherwise would just make the guide vaguer and less useful. With that settled, let's look at the codebase this all comes from.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__next" href="02-sourced-repository.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 2</span>
+        <span class="chapter-nav__title">Sourced Repository</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

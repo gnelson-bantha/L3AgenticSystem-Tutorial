@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 16 · Deployment</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 16</p>
+      <h1 class="chapter-title">Deployment</h1>
+      <p class="chapter-subhead">Running the system on a laptop and in the cloud from one description, with Aspire keeping the two honest.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Parity by Construction</span>
+        <h2>One Description, Two Environments</h2>
+        <p class="section-subhead">The orchestrator from Chapter 5 wasn't just a dev convenience; it's also the deployment model.</p>
+      </header>
+      <div class="prose">
+        <p>Back at the composition root we described the system's resources (storage, the database, the services, the references between them) in the Aspire AppHost, and treated it as the thing that boots everything for local development. Here's the part we held back: that same description is the deployment model. Aspire reads the AppHost in one of two modes. In run mode it wires everything up locally against emulators. In publish mode it provisions the real cloud resources and deploys the services to them. You don't maintain a separate stack of deployment scripts that slowly drifts away from how you actually run the thing day to day. There's one source of truth, and it bends to the environment.</p>
+        <p>That's worth pausing on, because dev/prod drift is where a frightening amount of operational pain comes from. When the local setup and the production setup are described by different artifacts, they diverge, and the divergence is exactly what you didn't test. Aspire's answer is to make them the same artifact read two ways.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">On Your Machine</span>
+        <h2>Running It Locally</h2>
+        <p class="section-subhead">Emulated cloud services in containers, one command, and the same credential flow you'll use in production.</p>
+      </header>
+      <div class="prose">
+        <p>Locally, the cloud dependencies run as emulators in containers, started for you by the AppHost. The storage account becomes Azurite, and the database becomes the Cosmos emulator, both spun up automatically. You don't install or configure anything by hand; you run the AppHost and the whole topology comes alive, services and their backing stores together, with the dashboard showing you every piece.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// Run mode: the same resources come up as local emulators in containers.
+var storage = builder.AddAzureStorage("storage").RunAsEmulator();          // Azurite
+var cosmos  = builder.AddAzureCosmosDB("cosmos").RunAsPreviewEmulator();    // Cosmos emulator</code></pre>
+      <pre class="codeblock"><code class="language-text"># Start the entire system, emulators and all, from the AppHost:
+aspire run</code></pre>
+      <div class="prose">
+        <p>Two details from earlier chapters quietly pay off here. The no-keys identity approach means that locally you're authenticated by your developer sign-in (the first link in the credential chain), with no secrets in a config file to leak or rotate. And because the services find each other by logical name through service discovery, the progress reporting from Chapter 13 works on your laptop exactly as it will in the cloud, no hardcoded localhost ports to adjust. The local environment isn't a stripped-down toy; it's the real shape of the system with cloud services stood in for.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">To the Cloud</span>
+        <h2>Publishing to Azure</h2>
+        <p class="section-subhead">The same AppHost, read in publish mode, provisions real services and ships the containers to them.</p>
+      </header>
+      <div class="prose">
+        <p>To run in the cloud you add the cloud-side targets to the same AppHost and let publish mode take over. A container app environment becomes the host for the services, the model backend points at a provisioned (or existing) Azure OpenAI resource, and an Application Insights resource gives the OpenTelemetry from Chapter 11 somewhere to land. The emulator calls are simply how those same resources behave in run mode; in publish mode they resolve to the genuine articles.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// Publish mode: the same model adds real cloud targets.
+var env      = builder.AddAzureContainerAppEnvironment("env");
+var openai   = builder.AddAzureOpenAI("openai");                 // provisioned, or .AsExisting(...)
+var insights = builder.AddAzureApplicationInsights("insights");  // sink for the OTel traces
+
+builder.AddProject&lt;Projects.IntakeHost&gt;("intakehost")
+    .WithReference(openai)
+    .WithReference(insights);</code></pre>
+      <pre class="codeblock"><code class="language-text"># Provision the resources from the AppHost model and deploy the services:
+azd up</code></pre>
+      <div class="prose">
+        <p>And the identity story closes itself out. In the cloud there's no developer sign-in, so the credential chain falls through to managed identity, which the deployment assigns to the services. The exact same code that authenticated against your local sign-in now authenticates as the workload's managed identity, with no API keys anywhere in the path, just as Chapter 3 promised. The one credential abstraction spans your laptop and production without a branch in the code.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Payoff</span>
+        <h2>Why Same-Code Deployment Matters</h2>
+        <p class="section-subhead">Parity isn't a nicety here; it's what makes an autonomous system trustworthy to ship.</p>
+      </header>
+      <div class="prose">
+        <p>It's easy to read this as tooling convenience, but for an autonomous system the parity is closer to a safety property. The thing you exercised locally (the same services, the same identity flow, the same service discovery, the same telemetry wiring) is the thing you ship. There's no separate production-only configuration path that goes untested until the worst possible moment. Because the agents run without a human gate, you really do want the deployed system to behave like the one you debugged, and one description read two ways is how you get that.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>What you tested ships</h3>
+          <p>Local and cloud are the same AppHost in two modes, so production isn't an untested configuration you meet for the first time on deploy day.</p>
+        </div>
+        <div class="info-card">
+          <h3>One identity story</h3>
+          <p>Developer sign-in locally, managed identity in the cloud, the same credential chain and zero keys in either place.</p>
+        </div>
+        <div class="info-card">
+          <h3>Observability on by default</h3>
+          <p>The telemetry built into the middleware flows to the dashboard locally and to Application Insights in the cloud, with nothing to turn on.</p>
+        </div>
+      </div>
+      <div class="prose">
+        <p>That's the system, end to end: built from clean seams, run autonomously, kept observable and accountable, and shipped from a single description. The only thing left is to point you at the deeper material for every piece of the stack we leaned on, so you can build your own. That's the appendix, and it's the final page.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="15-extending-the-system.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 15</span>
+        <span class="chapter-nav__title">Extending the System</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="17-appendix-additional-reading.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 17</span>
+        <span class="chapter-nav__title">Appendix: Additional Reading</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

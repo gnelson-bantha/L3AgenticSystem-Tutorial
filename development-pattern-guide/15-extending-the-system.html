@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 15 · Extending the System</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 15</p>
+      <h1 class="chapter-title">Extending the System</h1>
+      <p class="chapter-subhead">The seams you built for decoupling are the same seams you extend through. Here's where each one opens up.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Where to Push</span>
+        <h2>The Decouplings Are the Extension Points</h2>
+        <p class="section-subhead">Every boundary the pattern drew to keep things apart doubles as a place to add something new.</p>
+      </header>
+      <div class="prose">
+        <p>Now that the whole pattern is on the table, a nice property falls out of it: you already know where to extend it, because the extension points are exactly the boundaries you spent the last ten chapters building. Dependency injection at the composition root is where you add a participant. The protocol boundary in front of tools is where you add a capability. The storage bridge is where you change how work is dispatched. The middleware chain is where you add a cross-cutting concern. The workflow graph is where you change how the system is triggered. None of these required foresight about <em>this specific</em> extension; they were drawn for separation, and separation is what makes them open.</p>
+        <p>That's the quiet reward of building along clean seams. You don't extend this system by editing its core; you extend it by adding a part at a boundary and letting the existing composition pick it up. Let's walk the boundaries one at a time and see what each lets you add.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">More Hands, More Tools</span>
+        <h2>Adding Agents and Tools</h2>
+        <p class="section-subhead">A new collaborator joins the participant list; a new capability joins the tool server.</p>
+      </header>
+      <div class="prose">
+        <p>Adding an agent is almost anticlimactic. You build it through the same pool that builds the others, so it inherits the entire middleware stack (retry, identity baggage, governance, telemetry, compaction) for free, and then you hand it to the Group Chat builder as one more participant. The collaboration's natural-language coordination from Chapter 9 absorbs the newcomer without special wiring; the manager simply has another voice in the room.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// New agent: built by the same pool, so it gets the full middleware chain for free.
+var factCheckAgent = agentPool.Build("FactCheckAgent", factCheckInstructions);
+
+var workflow = AgentWorkflowBuilder
+    .CreateGroupChatBuilderWith(manager)
+    .AddParticipants(researchAgent, generatorAgent, reviewerAgent, factCheckAgent)
+    .Build();</code></pre>
+      <div class="prose">
+        <p>A new tool is just as contained. Because tools live behind the MCP boundary, you add one by writing a method on the tool server and marking it, and every agent that's allowed to see it can call it through the same protocol. The agents don't change; their menu of capabilities does. And when a capability is substantial in its own right (say, analytics over a warehouse), you don't have to cram it into the existing server at all. You can stand up a separate data agent (for example, a Microsoft Fabric data agent) that exposes its own MCP endpoint, and point a client at it exactly the way Chapter 7 connected to the first one. The protocol boundary makes "another tool" and "another whole tool service" the same shape of change.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// New tool: one annotated method on the tool server; agents reach it over MCP unchanged.
+[McpServerTool, Description("Look up the canonical record for a given identifier.")]
+public Task&lt;string&gt; LookupRecordAsync(string identifier) =&gt;
+    _records.GetCanonicalAsync(identifier);</code></pre>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">New Engines, New Doors</span>
+        <h2>Swapping Backends and Triggers</h2>
+        <p class="section-subhead">Change what powers an agent, or change what wakes the system up, without touching the loop in between.</p>
+      </header>
+      <div class="prose">
+        <p>The agents are coded against an abstraction, not a specific model host, so swapping in a different backend is a composition-root change rather than a rewrite. A hosted agent defined in Azure AI Foundry, for instance, comes in through <code>AIProjectClient.AsAIAgent(...)</code> against an agent reference, and then flows through the very same middleware extensions as a locally constructed agent. The collaboration loop never learns whether a participant is backed by a direct model client or a Foundry-hosted definition; it just sees an agent.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// Swap the engine: a Foundry-hosted agent, wrapped in the identical middleware chain.
+var hosted = projectClient
+    .AsAIAgent(new AgentReference(hostedAgentId))
+    .AsBuilder()
+    .WithRateLimitRetry()
+    .WithAgent365Baggage()
+    .WithOpenTelemetry()
+    .Build();</code></pre>
+      <div class="prose">
+        <p>Changing how the system is triggered is the other big lever, and it lives at the front of the intake graph. The reference system is woken by an operator submitting events through a conversational front door, but nothing downstream depends on that. You could replace it with a continuous scanner that watches a feed and emits the same normalized events, and the intake workflow, the bridge, and the processing stage wouldn't notice. Similarly, the storage-bridge dispatch from Chapter 8 was deliberately built so the polling mechanism could be swapped for a managed queue (Azure Event Grid or Azure Service Bus) when you outgrow polling. In every case the seam absorbs the change: a new trigger produces the same work, a new dispatcher moves the same work, and the autonomous middle stays put.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>New trigger</h3>
+          <p>Replace the conversational front door with a continuous scanner or scheduled job that emits the same normalized events. Intake onward is unaffected.</p>
+        </div>
+        <div class="info-card">
+          <h3>New dispatch</h3>
+          <p>Swap the blob-polling bridge for Event Grid or Service Bus when scale demands it. The claim-and-process contract stays the same.</p>
+        </div>
+        <div class="info-card">
+          <h3>New backend</h3>
+          <p>Bring agents from a different host (a Foundry-defined agent) in through the same builder, wrapped in the same middleware.</p>
+        </div>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Uniform Seam</span>
+        <h2>Extending the Middleware Itself</h2>
+        <p class="section-subhead">A new cross-cutting concern is one decorator and one extension method away.</p>
+      </header>
+      <div class="prose">
+        <p>The most reusable extension point of all is the middleware chain, because adding to it follows a single recipe no matter what you're adding. You write a class that wraps the agent's chat client (deriving from the framework's delegating base), do your work before or after delegating to the inner client, and expose a small <code>.With...</code> extension so it reads like the rest of the chain. Want a per-tenant budget guard, a prompt-injection screen, a redaction pass? Each is the same shape, and each slots into the chain wherever its order belongs, just as you saw in Chapter 11.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// A new cross-cutting concern: wrap, act, delegate, expose a .With... extension.
+public sealed class BudgetGuardChatClient(IChatClient inner, IBudget budget)
+    : DelegatingChatClient(inner)
+{
+    public override async Task&lt;ChatResponse&gt; GetResponseAsync(
+        IEnumerable&lt;ChatMessage&gt; messages, ChatOptions? options, CancellationToken ct)
+    {
+        budget.EnsureWithinLimit();                 // act before
+        return await base.GetResponseAsync(messages, options, ct);  // then delegate inward
+    }
+}
+
+public static class BudgetGuardExtensions
+{
+    public static ChatClientBuilder WithBudgetGuard(this ChatClientBuilder b, IBudget budget) =&gt;
+        b.Use(inner =&gt; new BudgetGuardChatClient(inner, budget));
+}</code></pre>
+      <div class="prose">
+        <p>So the system extends in five congruent ways, and all of them are additions at a boundary rather than surgery on the core: a participant at the composition root, a capability at the protocol boundary, a dispatcher at the storage bridge, a trigger at the head of the graph, and a concern in the middleware chain. If you internalize just one thing from this chapter, let it be that the cost of extension is set long before you extend, by how cleanly you drew your seams.</p>
+        <p>There's one practical question left that we've been gesturing at the whole time: how do you actually run this, on a laptop and in the cloud, without maintaining two different versions of the truth? That's deployment, and it's the next chapter.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="14-human-in-the-loop-revision.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 14</span>
+        <span class="chapter-nav__title">Human-in-the-Loop Revision</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="16-deployment.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 16</span>
+        <span class="chapter-nav__title">Deployment</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

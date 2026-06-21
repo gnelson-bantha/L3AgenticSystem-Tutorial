@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 14 · Human-in-the-Loop Revision</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 14</p>
+      <h1 class="chapter-title">Human-in-the-Loop Revision</h1>
+      <p class="chapter-subhead">Letting a person re-open a finished deliverable and re-run the very same agents, without softening the system's autonomy.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">A Careful Distinction</span>
+        <h2>Autonomy Doesn't Mean Unaccountable</h2>
+        <p class="section-subhead">There's a real difference between a human steering every step and a human reacting to a finished result, and it's the difference between Level 2 and Level 3.</p>
+      </header>
+      <div class="prose">
+        <p>It's tempting to think that letting humans intervene at all would knock the system back down to Level 2. It doesn't, and the reason is about <em>when</em> the human acts. Level 2 puts a person inside the execution loop: the agent does a step, waits for a human to approve, does the next step, waits again. The human is a gate the run cannot pass without. That's not what happens here. Here the agents run a complete job end to end with no human gate at all, produce a finished deliverable, and only then can a person look at it and say "actually, change this."</p>
+        <p>That after-the-fact feedback doesn't reach into a paused run; it kicks off a brand new autonomous run. The human supplies a direction and steps back out, and the agents go off and revise on their own, hitting the same review loop and the same termination rules as before. So the autonomy is intact: every run, original or revision, executes without a human in the middle of it. What we're adding is accountability, the ability to push back on a result, not supervision of each step. Keeping that line clear is what lets the system be genuinely autonomous and genuinely answerable to people at the same time.</p>
+      </div>
+      <div class="pull-quote">
+        <p>Human feedback here doesn't pause an autonomous run. It starts another one.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Foresight</span>
+        <h2>Why the Transcript Was Worth Saving</h2>
+        <p class="section-subhead">Revision is only cheap because the original run left behind everything you'd need to resume it.</p>
+      </header>
+      <div class="prose">
+        <p>Re-running the agents would be painful if you had to start cold, re-research everything, and hope the second attempt resembled the first. The system avoids that because every run persisted its full conversation to the session store (the Cosmos database wired up back at the composition root). That record holds the complete transcript of who said what, how many times the work has been revised, and the history of any feedback already applied.</p>
+        <p>That stored context is the quiet enabler of this whole chapter. When a revision comes in, you don't rebuild the world; you reload the run's memory and continue from it. The agents see the original brief, the research they already did, the drafts and critiques they already exchanged, and on top of all that, the new human request. The revision is an informed continuation rather than a fresh start, which is both cheaper and far more coherent.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>The transcript</h3>
+          <p>The full back-and-forth of the original Group Chat, so the agents resume with the same shared context they built the first time.</p>
+        </div>
+        <div class="info-card">
+          <h3>The revision count</h3>
+          <p>How many times this deliverable has already been reworked, so you can reason about, and cap, how much human-driven churn one item absorbs.</p>
+        </div>
+        <div class="info-card">
+          <h3>The feedback history</h3>
+          <p>Every prior human request, so a new revision builds on earlier direction instead of contradicting or forgetting it.</p>
+        </div>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Reuse</span>
+        <h2>Re-Entering the Same Loop</h2>
+        <p class="section-subhead">A revision doesn't get its own special machinery; it borrows the exact pipeline the original run used.</p>
+      </header>
+      <div class="prose">
+        <p>A person submits feedback by posting it to an endpoint keyed on the deliverable's id. That flips the deliverable into a "being modified" state and queues the revision. The handler that does the work is where the elegance lands: it loads the saved session, builds the <em>same</em> Group Chat from Chapter 9, and resumes the conversation with the human's note added as the newest message. Everything downstream, the round-robin, the reviewer's approval gate, the bounded loop, the middleware stack, behaves exactly as it did on the first run, because it literally is the same code.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">app.MapPost("/api/deliverables/{id}/feedback", async (
+    string id, HumanFeedback feedback, DeliverableService svc) =&gt;
+{
+    await svc.BeginRevisionAsync(id, feedback);  // sets status to Modifying, queues work
+    return Results.Accepted();
+});</code></pre>
+      <pre class="codeblock"><code class="language-csharp">public async Task RunRevisionAsync(string deliverableId, HumanFeedback feedback)
+{
+    // Resume, don't restart: reload the original run's memory from the session store.
+    var session = await sessionStore.LoadAsync(deliverableId);
+    session.RevisionCount++;
+    session.FeedbackHistory.Add(feedback);
+
+    // The very same Group Chat as the first run, seeded with the prior transcript
+    // plus the human's request as the latest message. Same agents, same loop, same cap.
+    var workflow = BuildGroupChat();
+    var result   = await workflow.ResumeAsync(session.Transcript, feedback.AsMessage());
+
+    // Update in place: the deliverable keeps its id, its correlation id, and its history.
+    await deliverableStore.UpdateAsync(deliverableId, result.FinalText, status: Reviewing);
+    await sessionStore.SaveAsync(session);
+}</code></pre>
+      <div class="prose">
+        <p>Notice the update is in place. The deliverable keeps its identity (the same id, the same correlation id that's threaded everywhere from the last chapter, the same lineage) rather than spawning a new record. A revision is a new version of one thing, not a second thing, and the storage reflects that. This is the composition discipline from Chapter 5 paying a dividend you might not have predicted: because the Group Chat was built from injected, reusable parts, the revision path got to reuse it wholesale instead of reimplementing it.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">State Machine</span>
+        <h2>A Lifecycle That Allows Return</h2>
+        <p class="section-subhead">None of this works unless the deliverable's states were designed to let finished work flow backward.</p>
+      </header>
+      <div class="prose">
+        <p>The thing that makes revision possible at the data level is that the deliverable's status was modeled as a small state machine with a way back, not a one-way march to "done." A deliverable starts pending, moves to reviewing while the agents work, and settles at filed when it's approved. The addition for human feedback is a modifying state that any reviewable or filed deliverable can drop into, and from which it returns to reviewing once the agents finish their revision pass.</p>
+      </div>
+      <pre class="codeblock"><code class="language-text">  Pending ──▶ Reviewing ──▶ Filed
+                  ▲                │
+                  │                │  human requests changes
+                  │                ▼
+                  └────────── Modifying
+            (revision pass finishes, re-enters Reviewing)</code></pre>
+      <div class="prose">
+        <p>The design lesson is to draw your state machine with the return paths in it from the start. It's easy to model only the forward happy path (created, working, done) and discover later that you've painted "done" as a terminal state with no way to reopen it. By giving the lifecycle an explicit modifying state and a documented route back to reviewing, the system makes human-driven iteration a first-class transition rather than a hack bolted onto a finished record. Work can come back, on purpose, through a door that was built for it.</p>
+        <p>That closes the loop on the pattern itself. We've gone from a raw event all the way to a reviewed, revisable deliverable, every piece of it autonomous where it counts and accountable where it should be. The remaining chapters are about living with the system: where to extend it, how to ship it, and where to read more. Extending comes first.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="13-correlation-and-progress.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 13</span>
+        <span class="chapter-nav__title">Correlation and Progress Across Hosts</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="15-extending-the-system.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 15</span>
+        <span class="chapter-nav__title">Extending the System</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

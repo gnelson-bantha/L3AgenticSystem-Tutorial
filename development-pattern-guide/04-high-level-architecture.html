@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 4 · High Level Architecture</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 4</p>
+      <h1 class="chapter-title">High Level Architecture</h1>
+      <p class="chapter-subhead">Every moving part on one map, and how a single event flows from left to right through the whole system.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Orientation</span>
+        <h2>How to Read the Map</h2>
+        <p class="section-subhead">We've named the pieces in prose; now here they are as a picture you can actually click around in.</p>
+      </header>
+      <div class="prose">
+        <p>The last three chapters built up a vocabulary and a mental shape. This one turns that shape into something concrete. Below is the whole system as a left-to-right graph: work enters on the left, flows through the two stages and the storage seam between them, and finishes on the right. Arrows are labeled with the relationship, so you can read the diagram almost like a sentence.</p>
+        <p>A few of the boxes are <strong>system nodes</strong>, marked with a small "System" badge. Those are dense enough that drawing all their internals on the main map would turn it into spaghetti, so they're collapsed. Click one and it opens with its own little graph inside, showing just that subsystem's parts and how they connect. The intake service, the processing service, and the agent middleware stack are all collapsed this way. Everything else opens to a plain description. Go ahead and poke at the nodes as you read the walkthrough underneath.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Big Picture</span>
+        <h2>System Map</h2>
+        <p class="section-subhead">Click any node to expand it. Arrows show how each component relates to the next.</p>
+      </header>
+
+      <div class="arch-graph" id="arch-main">
+        <div class="arch-layer">
+          <button class="arch-node" type="button" id="node-triggers" data-modal="arch-triggers">
+            <span class="arch-node__icon" aria-hidden="true">▸</span>
+            <span class="arch-node__title">Triggers</span>
+            <span class="arch-node__desc">The front doors that submit an event into the system.</span>
+            <span class="arch-node__expand">Expand</span>
+          </button>
+        </div>
+
+        <div class="arch-layer">
+          <button class="arch-node arch-node--system" type="button" id="node-intake" data-modal="arch-intake">
+            <span class="arch-node__badge">System · 3 parts</span>
+            <span class="arch-node__icon" aria-hidden="true">◆</span>
+            <span class="arch-node__title">Intake Service</span>
+            <span class="arch-node__desc">Turns one raw event into many concrete work items.</span>
+            <span class="arch-node__expand">Open system</span>
+          </button>
+        </div>
+
+        <div class="arch-layer">
+          <button class="arch-node" type="button" id="node-tools" data-modal="arch-tools">
+            <span class="arch-node__icon" aria-hidden="true">▧</span>
+            <span class="arch-node__title">Tool Server</span>
+            <span class="arch-node__desc">Serves data and control tools to agents over MCP.</span>
+            <span class="arch-node__expand">Expand</span>
+          </button>
+          <button class="arch-node" type="button" id="node-bridge" data-modal="arch-bridge">
+            <span class="arch-node__icon" aria-hidden="true">▤</span>
+            <span class="arch-node__title">Storage Bridge</span>
+            <span class="arch-node__desc">A blob container that decouples the two stages.</span>
+            <span class="arch-node__expand">Expand</span>
+          </button>
+          <button class="arch-node arch-node--system" type="button" id="node-middleware" data-modal="arch-middleware">
+            <span class="arch-node__badge">System · 5 parts</span>
+            <span class="arch-node__icon" aria-hidden="true">▥</span>
+            <span class="arch-node__title">Agent Middleware</span>
+            <span class="arch-node__desc">Cross-cutting layers wrapped around each agent's model client.</span>
+            <span class="arch-node__expand">Open system</span>
+          </button>
+        </div>
+
+        <div class="arch-layer">
+          <button class="arch-node arch-node--system" type="button" id="node-processing" data-modal="arch-processing">
+            <span class="arch-node__badge">System · 5 parts</span>
+            <span class="arch-node__icon" aria-hidden="true">◆</span>
+            <span class="arch-node__title">Processing Service</span>
+            <span class="arch-node__desc">Runs a reviewed agent team per work item, in parallel.</span>
+            <span class="arch-node__expand">Open system</span>
+          </button>
+        </div>
+
+        <div class="arch-layer">
+          <button class="arch-node" type="button" id="node-state" data-modal="arch-state">
+            <span class="arch-node__icon" aria-hidden="true">▦</span>
+            <span class="arch-node__title">State &amp; Delivery</span>
+            <span class="arch-node__desc">Durable stores plus the outbound notification connector.</span>
+            <span class="arch-node__expand">Expand</span>
+          </button>
+        </div>
+
+        <ul class="arch-edges" hidden>
+          <li data-from="node-triggers" data-to="node-intake" data-label="submits event"></li>
+          <li data-from="node-intake" data-to="node-tools" data-label="queries via MCP" data-aggregate></li>
+          <li data-from="node-intake" data-to="node-bridge" data-label="writes work items" data-label-dy="18"></li>
+          <li data-from="node-bridge" data-to="node-processing" data-label="feeds parallel runs"></li>
+          <li data-from="node-processing" data-to="node-tools" data-label="queries via MCP" data-aggregate></li>
+          <li data-from="node-intake" data-to="node-middleware" data-label="wraps client" data-aggregate></li>
+          <li data-from="node-processing" data-to="node-middleware" data-label="wraps client" data-aggregate></li>
+          <li data-from="node-processing" data-to="node-state" data-label="persists &amp; notifies" data-aggregate></li>
+        </ul>
+      </div>
+
+      <ul class="visually-hidden">
+        <li>A Trigger submits an event to the Intake Service.</li>
+        <li>The Intake Service writes one work item per affected target to the Storage Bridge.</li>
+        <li>The Storage Bridge feeds parallel runs into the Processing Service.</li>
+        <li>Both the Intake Service and the Processing Service query data from the Tool Server over MCP.</li>
+        <li>Both services wrap each agent's model client with the Agent Middleware stack.</li>
+        <li>The Processing Service persists results to, and sends notifications through, State and Delivery.</li>
+      </ul>
+    </section>
+
+    <div class="modal" id="arch-triggers" role="dialog" aria-modal="true" aria-labelledby="arch-triggers-title" hidden>
+      <div class="modal__backdrop" data-close></div>
+      <div class="modal__dialog" role="document">
+        <button class="modal__close" type="button" data-close aria-label="Close">×</button>
+        <p class="modal__eyebrow">Component</p>
+        <h2 class="modal__title" id="arch-triggers-title">Triggers</h2>
+        <div class="modal__body">
+          <p>The system doesn't care who starts it; it only cares that an event arrives. In the sample there are two front doors: an operator UI where a person submits a mock event and watches the agents work, and a conversational front door (a Microsoft 365 Copilot declarative agent) that submits events and checks status through the tool server. Either one posts the same event shape to the intake service.</p>
+          <p>Because the trigger is just "something posts an event," it's the easiest part to swap. A continuous scanner that watches a real feed and posts events would slot in here without changing anything downstream.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal modal--wide" id="arch-intake" role="dialog" aria-modal="true" aria-labelledby="arch-intake-title" hidden>
+      <div class="modal__backdrop" data-close></div>
+      <div class="modal__dialog" role="document">
+        <button class="modal__close" type="button" data-close aria-label="Close">×</button>
+        <p class="modal__eyebrow">System</p>
+        <h2 class="modal__title" id="arch-intake-title">Intake Service</h2>
+        <div class="modal__body">
+          <p>The first stage is a short, fixed pipeline built as an explicit workflow graph. A request trigger receives the event and starts a run; a normalizer agent enriches it; a selector agent queries target data and writes one work item per match. Two agents, two nodes, one direction of flow.</p>
+          <div class="arch-graph arch-graph--nested" id="arch-intake-graph">
+            <div class="arch-layer">
+              <button class="arch-node" type="button" id="node-in-trigger">
+                <span class="arch-node__icon" aria-hidden="true">▸</span>
+                <span class="arch-node__title">Request Trigger</span>
+                <span class="arch-node__desc">REST endpoint that starts a workflow run.</span>
+              </button>
+            </div>
+            <div class="arch-layer">
+              <button class="arch-node" type="button" id="node-in-normalizer">
+                <span class="arch-node__icon" aria-hidden="true">◇</span>
+                <span class="arch-node__title">Normalizer Agent</span>
+                <span class="arch-node__desc">Cleans and enriches the raw event.</span>
+              </button>
+            </div>
+            <div class="arch-layer">
+              <button class="arch-node" type="button" id="node-in-selector">
+                <span class="arch-node__icon" aria-hidden="true">◇</span>
+                <span class="arch-node__title">Selector Agent</span>
+                <span class="arch-node__desc">Matches targets and writes work items.</span>
+              </button>
+            </div>
+            <ul class="arch-edges" hidden>
+              <li data-from="node-in-trigger" data-to="node-in-normalizer" data-label="starts run"></li>
+              <li data-from="node-in-normalizer" data-to="node-in-selector" data-label="passes enriched event"></li>
+            </ul>
+          </div>
+          <p>Chapter 6 builds this graph node by node.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="arch-bridge" role="dialog" aria-modal="true" aria-labelledby="arch-bridge-title" hidden>
+      <div class="modal__backdrop" data-close></div>
+      <div class="modal__dialog" role="document">
+        <button class="modal__close" type="button" data-close aria-label="Close">×</button>
+        <p class="modal__eyebrow">Component</p>
+        <h2 class="modal__title" id="arch-bridge-title">Storage Bridge</h2>
+        <div class="modal__body">
+          <p>A plain blob container is the entire contract between the two stages. Intake writes a work-item blob; processing polls the container and picks each one up. Neither service holds a reference to the other, which is what lets them scale, deploy, and recover independently.</p>
+          <p>This unglamorous box is doing the most important structural job in the system, so it gets a whole chapter of its own. See Chapter 8.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal modal--wide" id="arch-processing" role="dialog" aria-modal="true" aria-labelledby="arch-processing-title" hidden>
+      <div class="modal__backdrop" data-close></div>
+      <div class="modal__dialog" role="document">
+        <button class="modal__close" type="button" data-close aria-label="Close">×</button>
+        <p class="modal__eyebrow">System</p>
+        <h2 class="modal__title" id="arch-processing-title">Processing Service</h2>
+        <div class="modal__body">
+          <p>The second stage is where the expensive work happens. A poller watches the bridge and launches one run per work item. Each run is a collaboration runner that opens a Group Chat among three agents: a researcher gathers material, a generator writes the deliverable, and a reviewer either approves it or sends it back. The edge from reviewer back to generator is the self-correcting loop.</p>
+          <div class="arch-graph arch-graph--nested" id="arch-processing-graph">
+            <div class="arch-layer">
+              <button class="arch-node" type="button" id="node-pr-poller">
+                <span class="arch-node__icon" aria-hidden="true">▸</span>
+                <span class="arch-node__title">Work Queue Poller</span>
+                <span class="arch-node__desc">Background service watching the bridge.</span>
+              </button>
+            </div>
+            <div class="arch-layer">
+              <button class="arch-node" type="button" id="node-pr-runner">
+                <span class="arch-node__icon" aria-hidden="true">▸</span>
+                <span class="arch-node__title">Collaboration Runner</span>
+                <span class="arch-node__desc">Opens one Group Chat run per item.</span>
+              </button>
+            </div>
+            <div class="arch-layer">
+              <button class="arch-node" type="button" id="node-pr-research">
+                <span class="arch-node__icon" aria-hidden="true">◇</span>
+                <span class="arch-node__title">Research Agent</span>
+                <span class="arch-node__desc">Gathers material via tools.</span>
+              </button>
+              <button class="arch-node" type="button" id="node-pr-generator">
+                <span class="arch-node__icon" aria-hidden="true">◇</span>
+                <span class="arch-node__title">Generator Agent</span>
+                <span class="arch-node__desc">Writes and revises the deliverable.</span>
+              </button>
+              <button class="arch-node" type="button" id="node-pr-reviewer">
+                <span class="arch-node__icon" aria-hidden="true">◇</span>
+                <span class="arch-node__title">Reviewer Agent</span>
+                <span class="arch-node__desc">Approves or requests revision.</span>
+              </button>
+            </div>
+            <ul class="arch-edges" hidden>
+              <li data-from="node-pr-poller" data-to="node-pr-runner" data-label="launches per item"></li>
+              <li data-from="node-pr-runner" data-to="node-pr-research" data-label="opens chat"></li>
+              <li data-from="node-pr-research" data-to="node-pr-generator" data-label="shares findings"></li>
+              <li data-from="node-pr-generator" data-to="node-pr-reviewer" data-label="submits draft"></li>
+              <li data-from="node-pr-reviewer" data-to="node-pr-generator" data-label="requests revision"></li>
+            </ul>
+          </div>
+          <p>Chapters 9 and 10 build the Group Chat and the loop that bounds it.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="arch-tools" role="dialog" aria-modal="true" aria-labelledby="arch-tools-title" hidden>
+      <div class="modal__backdrop" data-close></div>
+      <div class="modal__dialog" role="document">
+        <button class="modal__close" type="button" data-close aria-label="Close">×</button>
+        <p class="modal__eyebrow">Component</p>
+        <h2 class="modal__title" id="arch-tools-title">Tool Server</h2>
+        <div class="modal__body">
+          <p>Agents don't reach data directly. A standalone server exposes tools over the Model Context Protocol, and the agents call those tools without knowing where they run. The server offers data-query tools (look up targets by region, by size, by category) and a handful of workflow-control tools used by the conversational front door. A tool filter hides the control tools from the internal agents so they can't accidentally drive the workflow.</p>
+          <p>Because tools live behind a protocol boundary, you can add, change, or relocate them without touching agent code. Chapter 7 is all about this seam.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal modal--wide" id="arch-middleware" role="dialog" aria-modal="true" aria-labelledby="arch-middleware-title" hidden>
+      <div class="modal__backdrop" data-close></div>
+      <div class="modal__dialog" role="document">
+        <button class="modal__close" type="button" data-close aria-label="Close">×</button>
+        <p class="modal__eyebrow">System</p>
+        <h2 class="modal__title" id="arch-middleware-title">Agent Middleware</h2>
+        <div class="modal__body">
+          <p>None of the production concerns live inside the agents. Each one is a thin wrapper around the agent's model client, snapped on in a fluent chain. From the inside out: retry handling for rate limits, Agent 365 identity telemetry, Microsoft Purview content governance, OpenTelemetry tracing, and context compaction. Present or absent, each layer is optional, so the same agent runs bare locally and fully instrumented in production.</p>
+          <div class="arch-graph arch-graph--nested" id="arch-middleware-graph">
+            <div class="arch-layer">
+              <button class="arch-node" type="button" id="node-mw-retry">
+                <span class="arch-node__icon" aria-hidden="true">▥</span>
+                <span class="arch-node__title">Rate-Limit Retry</span>
+                <span class="arch-node__desc">Backs off and retries on throttling.</span>
+              </button>
+            </div>
+            <div class="arch-layer">
+              <button class="arch-node" type="button" id="node-mw-baggage">
+                <span class="arch-node__icon" aria-hidden="true">▥</span>
+                <span class="arch-node__title">Agent 365 Baggage</span>
+                <span class="arch-node__desc">Stamps identity telemetry onto calls.</span>
+              </button>
+            </div>
+            <div class="arch-layer">
+              <button class="arch-node" type="button" id="node-mw-purview">
+                <span class="arch-node__icon" aria-hidden="true">▥</span>
+                <span class="arch-node__title">Purview Governance</span>
+                <span class="arch-node__desc">Applies content policy checks.</span>
+              </button>
+            </div>
+            <div class="arch-layer">
+              <button class="arch-node" type="button" id="node-mw-otel">
+                <span class="arch-node__icon" aria-hidden="true">▥</span>
+                <span class="arch-node__title">OpenTelemetry</span>
+                <span class="arch-node__desc">Emits traces, metrics, and spans.</span>
+              </button>
+            </div>
+            <div class="arch-layer">
+              <button class="arch-node" type="button" id="node-mw-compaction">
+                <span class="arch-node__icon" aria-hidden="true">▥</span>
+                <span class="arch-node__title">Context Compaction</span>
+                <span class="arch-node__desc">Trims history to fit the window.</span>
+              </button>
+            </div>
+            <ul class="arch-edges" hidden>
+              <li data-from="node-mw-retry" data-to="node-mw-baggage" data-label="wraps"></li>
+              <li data-from="node-mw-baggage" data-to="node-mw-purview" data-label="wraps"></li>
+              <li data-from="node-mw-purview" data-to="node-mw-otel" data-label="wraps"></li>
+              <li data-from="node-mw-otel" data-to="node-mw-compaction" data-label="wraps"></li>
+            </ul>
+          </div>
+          <p>Chapters 11 and 12 take this stack apart layer by layer.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="arch-state" role="dialog" aria-modal="true" aria-labelledby="arch-state-title" hidden>
+      <div class="modal__backdrop" data-close></div>
+      <div class="modal__dialog" role="document">
+        <button class="modal__close" type="button" data-close aria-label="Close">×</button>
+        <p class="modal__eyebrow">Component</p>
+        <h2 class="modal__title" id="arch-state-title">State &amp; Delivery</h2>
+        <div class="modal__body">
+          <p>When a run finishes, its output has to land somewhere durable and the world has to hear about it. Finished deliverables go to a table store with a pointer blob; the conversation transcript for each run goes to a session store so a human can later re-open and re-run it; and a best-effort notification connector announces completion. All of it sits behind a small persistence layer so the agents never touch storage SDKs directly.</p>
+          <p>The session store is what makes the human-in-the-loop revision in Chapter 14 possible.</p>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Narrative</span>
+        <h2>One Event, Left to Right</h2>
+        <p class="section-subhead">If you trace a single event through the boxes above, the whole design reads as one continuous motion.</p>
+      </header>
+      <div class="prose">
+        <p>Here's the life of one event in a paragraph. A trigger posts it to the intake service. Intake's normalizer agent cleans it up, then its selector agent asks the tool server which targets are affected and writes one work item per match into the storage bridge. That's the end of intake's job; it never waits for processing.</p>
+        <p>On the other side of the bridge, the processing service's poller notices the new work items and launches a separate run for each one, all at the same time. Inside each run, a researcher, a generator, and a reviewer take turns in a shared conversation. The reviewer holds the gate: it either approves the deliverable or sends it back to the generator, looping until it's satisfied or until a hard cap is reached. When the run finishes, the result is persisted to state and a notification goes out. Threaded through all of it, the same correlation id rides along so you can follow one event across both processes, and every agent's model calls pass through the middleware stack for retry, telemetry, governance, tracing, and compaction.</p>
+        <p>That's the entire system in one breath, which means you now have the map for everything that follows. The pattern chapters each zoom into one box. We start where the program itself starts: the composition root, where every one of these pieces gets constructed and wired together. That's next.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="03-prerequisites.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 3</span>
+        <span class="chapter-nav__title">Prerequisites</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="05-composition-root.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 5</span>
+        <span class="chapter-nav__title">The Composition Root</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

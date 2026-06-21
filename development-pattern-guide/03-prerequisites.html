@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 3 · Prerequisites</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 3</p>
+      <h1 class="chapter-title">Prerequisites</h1>
+      <p class="chapter-subhead">The tools, accounts, and background worth having in place before you build your own version of the pattern.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Starting Point</span>
+        <h2>What You Should Already Be Comfortable With</h2>
+        <p class="section-subhead">You don't need to be an agent expert, but a few things will keep you from tripping in the first hour.</p>
+      </header>
+      <div class="prose">
+        <p>The last chapter named a lot of moving parts. This chapter makes sure you've got the ground under you before we start assembling them. The good news is the list is shorter than it looks, because Aspire and the Agent Framework do a lot of the heavy lifting.</p>
+        <p>On the language side, you want to be comfortable with modern C# and <code>async</code>/<code>await</code>. The whole system is asynchronous, agents stream tokens, storage calls are awaited, and background services loop on tasks. You should also be at ease with constructor dependency injection and the generic host, because that's how every service is wired. None of it is exotic, but if <code>IServiceCollection</code> and <code>IHostedService</code> are new to you, skim a primer first.</p>
+        <p>On the AI side, you only need a working mental model, not deep expertise. It helps to know that a large language model takes a list of messages and streams back a completion, that "tools" are functions the model can ask to call, and that an "agent" is just a model plus instructions plus (optionally) tools and memory. If you've ever wired up a chat completion call by hand, you're more than ready. You do <em>not</em> need prior experience with the Agent Framework, MCP, or Aspire; the point of the guide is to teach those.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Toolchain</span>
+        <h2>What to Install</h2>
+        <p class="section-subhead">A .NET SDK, a container runtime for the local emulators, and an editor that understands Aspire.</p>
+      </header>
+      <div class="prose">
+        <p>The system targets .NET 10 and is orchestrated by Aspire, which ships as a project SDK rather than a separate workload now, so getting set up is mostly about the .NET SDK plus a container runtime for the local emulators. Here's the short list.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>.NET 10 SDK</h3>
+          <p>The whole solution targets <code>net10.0</code>. Install the SDK, then confirm with <code>dotnet --version</code>. Aspire comes in as the <code>Aspire.AppHost.Sdk</code> reference, so there's no separate workload to install.</p>
+        </div>
+        <div class="info-card">
+          <h3>A container runtime</h3>
+          <p>Docker Desktop or Podman. Aspire uses it to run the Azure Storage emulator (Azurite) and the Cosmos DB emulator locally, so storage works on your laptop with no cloud account at all.</p>
+        </div>
+        <div class="info-card">
+          <h3>An Aspire-aware editor</h3>
+          <p>Visual Studio, VS Code with the C# Dev Kit, or JetBrains Rider. Any of them can launch the Aspire AppHost and give you the dashboard that shows every service, log stream, and trace.</p>
+        </div>
+        <div class="info-card">
+          <h3>The Azure CLI</h3>
+          <p><code>az</code> is how you sign in for local development. The system uses your signed-in identity to reach Azure OpenAI, so a quick <code>az login</code> is part of the loop. No keys to copy around.</p>
+        </div>
+      </div>
+      <div class="prose">
+        <p>Once those are present, running the system is a single command from the AppHost project, which we'll get to in the deployment chapter. For now, just make sure the four boxes above are checked.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Credentials</span>
+        <h2>The Model Backing and Why There Are No Keys</h2>
+        <p class="section-subhead">You'll need a model deployment to talk to, and the system reaches it through your identity rather than a secret.</p>
+      </header>
+      <div class="prose">
+        <p>The agents need a model to think with, and in the sample that's an Azure OpenAI chat deployment. You provide its endpoint and deployment name through configuration; everything else flows from your identity. There's a deliberate design choice hiding in that sentence, and it's worth pausing on because it shapes the whole codebase.</p>
+        <p>The system never uses an API key. Instead it authenticates with <code>ChainedTokenCredential</code>, which tries a sequence of credential sources in order and uses the first that works. Locally that's your <code>az login</code> session or your editor's signed-in account; in Azure it's the service's managed identity. The same code path works in both places, and there's no secret to leak, rotate, or accidentally commit.</p>
+      </div>
+      <div class="callout">
+        <span class="callout-label">Why this matters early</span>
+        <p>If you've built LLM apps with an API key in an environment variable, the keyless approach can feel like extra ceremony at first. It pays off immediately: the exact same agent code runs on your laptop under your own identity and in production under a managed identity, with role assignments (not secrets) deciding what each one can reach. Get <code>az login</code> working now and the rest of the guide just works.</p>
+      </div>
+      <div class="prose">
+        <p>Everything beyond the model is optional. Agent 365 telemetry, Microsoft Purview governance, Azure AI Foundry prompt agents, Microsoft Fabric data agents, and Logic Apps notifications all light up only when you configure them, and the system runs perfectly without any of them. That optionality is not an accident; it's the middleware pattern from Chapter 11 doing its job. You can build and run the whole thing against nothing but a model deployment and local emulators, then add the production concerns one at a time.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Vocabulary</span>
+        <h2>A Five-Minute Agent Framework Primer</h2>
+        <p class="section-subhead">Five terms show up on nearly every page from here on, so let's define them once and move on.</p>
+      </header>
+      <div class="prose">
+        <p>The guide leans on a small vocabulary from the Microsoft Agent Framework. You'll pick most of it up in context, but seeding the definitions now means the architecture chapter reads smoothly instead of stopping to explain itself.</p>
+        <p>An <strong><code>IChatClient</code></strong> is the low-level handle to a model: give it messages, get back a streamed response. It's the seam everything else wraps around. A <strong><code>ChatClientAgent</code></strong> is an agent built on top of one: a model client plus instructions plus optional tools and memory, exposing a tidy "run this and give me the result" surface. The researcher, generator, and reviewer are all <code>ChatClientAgent</code> instances.</p>
+        <p>A <strong>workflow</strong> is how you connect more than one executor into a graph. The Agent Framework gives you <code>WorkflowBuilder</code> for explicit node-and-edge graphs (which intake uses) and <code>AgentWorkflowBuilder</code> for higher-level patterns like <strong>Group Chat</strong>, where several agents share one conversation and a manager decides who speaks next (which processing uses). Finally, <strong>MCP</strong>, the Model Context Protocol, is the standard way agents reach tools that live in a separate server; the agents call tools without knowing or caring where those tools run.</p>
+        <p>That's the whole glossary. With the toolchain installed, a model deployment in hand, and these five words defined, you're ready for the part everyone actually wants: the map of how it all fits together. The next chapter is a clickable architecture diagram you can explore node by node.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="02-sourced-repository.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 2</span>
+        <span class="chapter-nav__title">Sourced Repository</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="04-high-level-architecture.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 4</span>
+        <span class="chapter-nav__title">High Level Architecture</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

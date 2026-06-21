@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 12 · Context Management with a Compaction Pipeline</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 12</p>
+      <h1 class="chapter-title">Context Management with a Compaction Pipeline</h1>
+      <p class="chapter-subhead">Keeping a long, multi-turn agent conversation from blowing past the model's context window.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Squeeze</span>
+        <h2>The Window Always Fills</h2>
+        <p class="section-subhead">A self-correcting loop is a conversation that grows, and the model can only hold so much.</p>
+      </header>
+      <div class="prose">
+        <p>Think about what a processing run actually accumulates. The research agent dumps in findings, sometimes large tool results. The generator writes a full draft, then another, then another as the reviewer sends it back. The reviewer adds critique each lap. By the time a hard case has gone three or four rounds, the shared transcript is long, and every model call has to fit inside the context window. A long autonomous loop is, by its nature, a conversation that grows without anyone pruning it.</p>
+        <p>You can't just let it overflow, and you can't just chop off the oldest messages either, because the early context (the brief, the key findings) is often what keeps the later turns coherent. What you want is to shrink the conversation thoughtfully: shed what's least valuable, preserve what carries meaning, and only get aggressive when you truly have to. The Agent Framework ships a mechanism for exactly this, and the system uses it as the outermost middleware layer from the last chapter.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Escalation</span>
+        <h2>A Pipeline of Strategies, Cheapest First</h2>
+        <p class="section-subhead">Rather than one blunt rule, compaction is a ladder of trims that each fire only when needed.</p>
+      </header>
+      <div class="prose">
+        <p>The clever part is that compaction isn't a single tactic; it's a pipeline of strategies arranged from gentlest to bluntest, each guarded by its own threshold. They're composed with the framework's <code>PipelineCompactionStrategy</code>, which runs them in order and only applies the ones whose trigger has been crossed. On a short conversation, none of them fire. As it grows, they kick in one at a time, escalating only as far as the pressure demands.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// Ordered gentlest to bluntest. Each fires only when its own threshold is crossed,
+// so a run escalates exactly as far as the conversation's size forces it to.
+var strategy = new PipelineCompactionStrategy(
+[
+    // 1. Drop the bulky raw tool outputs once there are enough messages to spare them.
+    new ToolResultCompactionStrategy    { MessagesExceed = 7 },
+
+    // 2. Replace older turns with a running summary once tokens climb.
+    new SummarizationCompactionStrategy { TokensExceed = 4096 },
+
+    // 3. Keep only the most recent turns when the back-and-forth gets long.
+    new SlidingWindowCompactionStrategy { TurnsExceed = 4 },
+
+    // 4. Last resort: hard-truncate to fit before the window is exceeded.
+    new TruncationCompactionStrategy    { TokensExceed = 32000 },
+]);</code></pre>
+      <div class="prose">
+        <p>Read the ladder and the philosophy is obvious. First it removes tool results, which are big and rarely needed verbatim once the agent has used them. If tokens still climb, it summarizes older turns, trading exact wording for compressed meaning. If the chat is still long, it slides a window over the recent turns and lets the older ones fall away. And only if all of that isn't enough does it hard-truncate, the bluntest move, reserved as a final guarantee that a call never exceeds the window. Each step is more lossy than the one before, which is exactly why each is tried only after the gentler ones came up short.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>Tool-result trimming</h3>
+          <p>The lightest touch. Verbose tool payloads are dropped once the conversation has enough messages, since the agent has already consumed what it needed from them.</p>
+        </div>
+        <div class="info-card">
+          <h3>Summarization</h3>
+          <p>Older turns get folded into a compact summary as token counts rise, keeping the gist of the conversation while reclaiming a lot of room.</p>
+        </div>
+        <div class="info-card">
+          <h3>Sliding window</h3>
+          <p>When the turn count itself grows large, only the most recent turns are kept in full, on the bet that recency carries most of the working context.</p>
+        </div>
+        <div class="info-card">
+          <h3>Truncation</h3>
+          <p>The hard backstop. If everything else still leaves too much, the history is cut to fit. Lossy by design, last by intent, and a guarantee the call will fit.</p>
+        </div>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Wiring</span>
+        <h2>Plugging It In Per Agent</h2>
+        <p class="section-subhead">The strategy pipeline rides inside a provider that gives each agent its own compacted view.</p>
+      </header>
+      <div class="prose">
+        <p>The strategy pipeline is wrapped in a <code>CompactionProvider</code>, and that provider is what the <code>.WithCompaction(...)</code> layer from the previous chapter installs. Under the hood it registers as an AI context provider with <code>UseAIContextProviders</code>, keyed per agent. That per-agent keying matters: each participant in the Group Chat keeps and compacts its own view of the conversation, so the researcher's window and the generator's window are managed independently rather than sharing one pool.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// The provider carries the strategy pipeline. .WithCompaction(...) registers it as
+// a per-agent AI context provider, so every agent manages its own context budget.
+var compaction = new CompactionProvider(strategy);
+
+IChatClient client = baseChatClient
+    /* ...the other middleware layers... */
+    .WithCompaction(compaction);   // outermost: trims before any inner layer runs</code></pre>
+      <div class="callout">
+        <span class="callout-label">A heads-up about experimental APIs</span>
+        <p>The compaction types are marked experimental in the Agent Framework (they surface a diagnostic with the id <code>MAAI001</code>), which is the framework's way of saying the surface may still shift. You opt in deliberately by acknowledging that diagnostic where you use them. It's a small ceremony, but a useful signal: pin your versions and expect these particular APIs to evolve faster than the stable core.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Lesson</span>
+        <h2>Escalation Beats a Single Blunt Rule</h2>
+        <p class="section-subhead">The design generalizes well beyond context windows, which is why it's worth lingering on.</p>
+      </header>
+      <div class="prose">
+        <p>Step back from the specifics and there's a tidy principle here. When you have to give something up under pressure, don't reach for the most destructive option first. Arrange your responses from least costly to most costly, gate each behind a threshold, and let the situation decide how far up the ladder you climb. Most of the time the gentle moves are enough and the blunt ones never fire. When a genuinely hard case shows up, you still have a guaranteed backstop, but you reached it only after exhausting the kinder options.</p>
+        <p>That shape, ordered strategies with escalating cost and per-step triggers, shows up all over robust systems: cache eviction, load shedding, retry-and-degrade. Compaction is just a particularly clear instance of it, applied to the one resource an autonomous agent loop will always strain against. It's the last piece of the cross-cutting machinery.</p>
+        <p>With the agents fully equipped, we can zoom back out to the system level and answer a question we've been deferring: how do you follow one event across two separate processes, and how does the operator see progress while it all happens in the background? That's correlation and progress, and it's next.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="11-composable-middleware.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 11</span>
+        <span class="chapter-nav__title">Composable Middleware for the Agent Client</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="13-correlation-and-progress.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 13</span>
+        <span class="chapter-nav__title">Correlation and Progress Across Hosts</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

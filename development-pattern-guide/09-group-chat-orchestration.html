@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 9 · The Collaboration Stage</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 9</p>
+      <h1 class="chapter-title">The Collaboration Stage: Group Chat Orchestration</h1>
+      <p class="chapter-subhead">Three agents taking turns in a shared conversation, with no routing code for you to write.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">A Different Shape</span>
+        <h2>Three Agents, One Conversation</h2>
+        <p class="section-subhead">Intake was a straight line of typed messages; this stage is a conversation, and the difference is the whole point.</p>
+      </header>
+      <div class="prose">
+        <p>The poller just launched a run for one work item. Inside that run, the work is genuinely open-ended: research something, write it up, judge whether the write-up is good, and possibly go around again. You can't draw that as a fixed line of nodes ahead of time, because how many laps it takes depends on what the agents produce. So instead of intake's explicit graph, processing uses the Agent Framework's other coordination style: a Group Chat.</p>
+        <p>In a Group Chat, the agents share a single conversation transcript. Each one can read everything said so far, and a manager decides who speaks next. They don't pass typed messages along wired edges; they just talk, in natural language, into a common thread. The researcher's findings, the generator's draft, the reviewer's verdict are all messages in one transcript that every participant can see. That shared context is what lets them collaborate without you hand-coding the handoffs.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>Research Agent</h3>
+          <p>Reads the work item, gathers the facts that matter using the MCP data tools, and lays them into the conversation for the others to build on.</p>
+        </div>
+        <div class="info-card">
+          <h3>Generator Agent</h3>
+          <p>Turns the research into the actual deliverable, and later revises it in place when the reviewer asks for changes.</p>
+        </div>
+        <div class="info-card">
+          <h3>Reviewer Agent</h3>
+          <p>The quality gate. Reads the draft against the brief and either approves it or sends specific feedback back into the conversation.</p>
+        </div>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Assembly</span>
+        <h2>Building the Group Chat</h2>
+        <p class="section-subhead">A builder, a manager, three participants, and a seed message: the run is four lines of setup.</p>
+      </header>
+      <div class="prose">
+        <p>The collaboration runner is what the poller calls per work item. It pulls the three agents from the pool, hands them to a Group Chat builder along with a manager, and starts the conversation with a seed message describing the job. The framework takes it from there: it loops, asking the manager who goes next and feeding each agent the shared transcript, until the manager says to stop.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">public async Task RunAsync(WorkItem item, CancellationToken ct)
+{
+    var research   = agentPool.GetResearcher();
+    var generator  = agentPool.GetGenerator();
+    var reviewer   = agentPool.GetReviewer();
+
+    // The manager decides who speaks next and when the chat is finished.
+    // It's an ordinary round-robin here, customized to stop on approval (Chapter 10).
+    var manager = new ApprovalGroupChatManager(maxIterations: 3);
+
+    var workflow = AgentWorkflowBuilder
+        .CreateGroupChatBuilderWith(manager)
+        .AddParticipants(research, generator, reviewer)
+        .Build();
+
+    // Seed the conversation with the brief, then let the agents talk it out.
+    var seed   = WorkItemPrompt.For(item);
+    var result = await workflow.RunAsync(seed, ct);
+
+    await SaveDeliverableAsync(item, result);   // persist and notify (Chapters 13, 14)
+}</code></pre>
+      <div class="prose">
+        <p>Compare this to the intake graph and the philosophy difference is clear. Intake said exactly which node feeds which. Here we just name the participants and a manager, and the coordination emerges from the conversation. You added an agent to intake by adding an edge; you'd add an agent here by adding it to the participant list. The framework absorbs the wiring.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Soft Coordination</span>
+        <h2>Coordinating Through Natural-Language Signals</h2>
+        <p class="section-subhead">The agents steer each other not with code but with agreed phrases dropped into their messages.</p>
+      </header>
+      <div class="prose">
+        <p>If nobody wires the handoffs, how does the research agent tell the generator "I'm done, your turn"? Through the conversation itself. The agents are instructed to end their messages with specific marker phrases, and the others (and the manager) react to those markers. It's coordination by convention rather than by code, and it's surprisingly effective because the markers are right there in the shared transcript for everyone to read.</p>
+        <p>The research agent, for instance, has an escape hatch. If it decides the event has no real effect on this target, it doesn't waste the generator's time; it signals that the work is essentially a no-op and the chat can wind down with a minimal result. Otherwise it signals that there's enough to write about.</p>
+      </div>
+      <pre class="codeblock"><code class="language-text">Research agent instructions (excerpt)
+
+If the event has no material effect on this target, reply with exactly
+MINIMAL_IMPACT followed by a one-line reason, and do not gather further detail.
+
+Otherwise, gather the relevant facts from the data tools and end your message
+with GENERATE_REPORT, which tells the generator it has enough to begin.</code></pre>
+      <div class="prose">
+        <p>The generator does its own small triage when it's handed the conversation. If the research looks thin for what's being asked, it can say so and effectively send the ball back rather than writing on a weak foundation; if the research is solid, it proceeds straight to drafting. These signals (a request for more research, or a decision to write directly) keep the team from lurching forward on bad inputs. None of it is enforced by types or method calls. It's a shared vocabulary the agents agree to use, read out of the common transcript.</p>
+      </div>
+      <div class="callout">
+        <span class="callout-label">Why this works, and where to be careful</span>
+        <p>Natural-language signals are flexible and need zero plumbing, which is why they're a joy to prototype with. The cost is that they lean on the model actually emitting the agreed phrase, so the marker words should be distinctive, the instructions should be blunt about the exact format, and anything that reads a marker should fail safe when it's missing. The reviewer's approval signal in the next chapter is held to exactly that standard, because a missed approval there has real consequences.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Conductor</span>
+        <h2>Round-Robin, and Why There's a Manager at All</h2>
+        <p class="section-subhead">The manager is a small seam with outsized power, which is exactly why the next chapter lives inside it.</p>
+      </header>
+      <div class="prose">
+        <p>The manager's job is to answer two questions on every turn: who speaks next, and are we done? In this system the "who speaks next" answer is a plain round-robin, the agents take turns in order, which is about the simplest policy there is and works fine for a three-agent team with a clear rhythm. You could make it smarter (let the manager read the transcript and pick the most relevant next speaker), but round-robin keeps the behavior predictable and easy to reason about.</p>
+        <p>The "are we done?" question is where the real leverage hides. The default would be to stop after some fixed number of turns. That's not good enough for an autonomous system, because the right time to stop is "when the reviewer is satisfied," which you can't know in advance. So the system subclasses the round-robin manager and teaches it to watch for the reviewer's approval, while still keeping a hard ceiling so a never-satisfied reviewer can't loop forever. That custom termination logic is the self-correcting feedback loop, and it's important enough to get the whole next chapter.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="08-storage-bridge.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 8</span>
+        <span class="chapter-nav__title">The Storage Bridge for Parallel Scale</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="10-self-correcting-feedback-loop.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 10</span>
+        <span class="chapter-nav__title">The Self-Correcting Feedback Loop</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Level 3 Agentic System Guide · Contents</title>
+  <!-- Apply the saved theme before first paint to avoid a flash of the wrong theme. -->
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <section class="toc-hero">
+      <h1><em>Level 3</em> Agentic System Guide</h1>
+      <p class="subhead">How to build a distributed, autonomous multi-agent system: decoupled stages, parallel fan-out, a self-correcting review loop, and composable agent middleware over Azure OpenAI and the Microsoft Agent Framework.</p>
+    </section>
+
+    <ol class="toc-grid">
+      <li><a class="toc-entry" href="01-introduction.html">
+        <span class="toc-entry__num">01</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">Introduction</span>
+          <span class="toc-entry__sub">What "Level 3" autonomy really means, and the shape of the pattern you're about to build.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="02-sourced-repository.html">
+        <span class="toc-entry__num">02</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">Sourced Repository</span>
+          <span class="toc-entry__sub">The real codebase this guide generalizes from, named the way it actually ships.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="03-prerequisites.html">
+        <span class="toc-entry__num">03</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">Prerequisites</span>
+          <span class="toc-entry__sub">The tools, SDKs, and background worth having in place before you write a line.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="04-high-level-architecture.html">
+        <span class="toc-entry__num">04</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">High Level Architecture</span>
+          <span class="toc-entry__sub">Every moving part on one map, and how work flows from left to right.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="05-composition-root.html">
+        <span class="toc-entry__num">05</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">The Composition Root</span>
+          <span class="toc-entry__sub">Where the whole system gets wired together and handed its dependencies.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="06-intake-workflow-graph.html">
+        <span class="toc-entry__num">06</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">The Intake Stage: A Linear Workflow Graph</span>
+          <span class="toc-entry__sub">A small fixed agent pipeline that turns a raw event into matched units of work.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="07-tool-access-mcp.html">
+        <span class="toc-entry__num">07</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">Tool Access Through a Protocol Boundary</span>
+          <span class="toc-entry__sub">Giving agents tools over the Model Context Protocol instead of hard-wiring functions.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="08-storage-bridge.html">
+        <span class="toc-entry__num">08</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">The Storage Bridge for Parallel Scale</span>
+          <span class="toc-entry__sub">Why a plain blob container sits between the two halves of the system.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="09-group-chat-orchestration.html">
+        <span class="toc-entry__num">09</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">The Collaboration Stage: Group Chat Orchestration</span>
+          <span class="toc-entry__sub">Three agents taking turns in a shared conversation, with no routing code to write.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="10-self-correcting-feedback-loop.html">
+        <span class="toc-entry__num">10</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">The Self-Correcting Feedback Loop</span>
+          <span class="toc-entry__sub">A reviewer that can send work back, and a cap that guarantees the loop ends.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="11-composable-middleware.html">
+        <span class="toc-entry__num">11</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">Composable Middleware for the Agent Client</span>
+          <span class="toc-entry__sub">Stacking Agent 365, Microsoft Purview, OpenTelemetry, and retry as IChatClient layers.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="12-context-compaction.html">
+        <span class="toc-entry__num">12</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">Context Management with a Compaction Pipeline</span>
+          <span class="toc-entry__sub">Keeping long agent conversations from blowing past the model's context window.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="13-correlation-and-progress.html">
+        <span class="toc-entry__num">13</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">Correlation and Progress Across Hosts</span>
+          <span class="toc-entry__sub">One id threads the whole pipeline while progress hops across process boundaries.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="14-human-in-the-loop-revision.html">
+        <span class="toc-entry__num">14</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">Human-in-the-Loop Revision</span>
+          <span class="toc-entry__sub">Letting a person re-open a finished deliverable and re-run the very same agents.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="15-extending-the-system.html">
+        <span class="toc-entry__num">15</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">Extending the System</span>
+          <span class="toc-entry__sub">Where to plug in new agents, tools, model backends, and triggers.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="16-deployment.html">
+        <span class="toc-entry__num">16</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">Deployment</span>
+          <span class="toc-entry__sub">Taking the system from emulators on your laptop to Azure with one Aspire command.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="toc-entry" href="17-appendix-additional-reading.html">
+        <span class="toc-entry__num">17</span>
+        <span class="toc-entry__body">
+          <span class="toc-entry__title">Appendix: Additional Reading</span>
+          <span class="toc-entry__sub">Documentation and references for every part of the stack behind the pattern.</span>
+        </span>
+        <span class="toc-entry__arrow" aria-hidden="true">→</span>
+      </a></li>
+    </ol>
+  </main>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

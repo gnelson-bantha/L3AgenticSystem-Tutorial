@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 5 · The Composition Root</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 5</p>
+      <h1 class="chapter-title">The Composition Root</h1>
+      <p class="chapter-subhead">Where the whole system gets constructed, wired together, and handed its dependencies before any work begins.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">First Principles</span>
+        <h2>Where a Distributed System Begins</h2>
+        <p class="section-subhead">The architecture map showed the boxes; this chapter shows the one place where those boxes get built.</p>
+      </header>
+      <div class="prose">
+        <p>Every program has a spot where the abstract design becomes concrete objects: dependencies get constructed, handed to whatever needs them, and the application starts running. That spot has a name, the composition root, and keeping it in one place is one of the highest-leverage decisions you can make. When construction lives at the root and everything else just receives what it needs, the rest of the code stays ignorant of how things are built. That ignorance is what makes the pieces swappable, which is the entire game in a system you want to extend later.</p>
+        <p>A distributed system has this at two levels, and it's worth holding both in your head. There's the composition root for each individual service (its <code>Program.cs</code>, where that one process wires up its own dependencies), and there's a composition root for the <em>whole distributed application</em>, which describes how the services and their backing resources fit together. In this system the second one is the Aspire orchestrator, and it's the more interesting of the two, so we'll start there.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Orchestrator</span>
+        <h2>One File That Describes the Whole System</h2>
+        <p class="section-subhead">Aspire lets you declare every service and every resource in plain C#, then runs the lot with one command.</p>
+      </header>
+      <div class="prose">
+        <p>The orchestrator project is the top of the system. It doesn't contain business logic; its only job is to declare what exists and how it connects. You list the backing resources (storage, the conversation database), you list the services (the tool server, the two stages, the operator UI), and you describe the references between them. Aspire takes that declaration and brings the whole thing up, wiring connection strings and service discovery so no service has to hardcode where another one lives.</p>
+        <p>The neat trick is that the same file behaves differently depending on whether you're running locally or publishing. Locally, the storage and database resources run as emulators in containers, so you need no cloud account to develop. When you publish, those same declarations resolve to real Azure resources. One description, two environments.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">var builder = DistributedApplication.CreateBuilder(args);
+
+// Backing resources. Locally these run as emulators in containers;
+// at publish time the same handles resolve to real Azure resources.
+var storage = builder.AddAzureStorage("storage").RunAsEmulator();
+var blobs  = storage.AddBlobs("BlobStorage");     // the stage-to-stage bridge
+var tables = storage.AddTables("TableStorage");   // finished deliverables
+
+var cosmos = builder.AddAzureCosmosDB("cosmosdb").RunAsPreviewEmulator();
+var memory = cosmos.AddCosmosDatabase("AgentMemory");
+memory.AddContainer("ConversationSessions", "/deliverableId"); // run transcripts
+
+// The tool server has to be ready before any agent can call it.
+var tools = builder.AddProject&lt;Projects.ToolServer&gt;("toolserver");
+
+// Stage one: intake. Reads/writes storage, talks to the tool server.
+var intake = builder.AddProject&lt;Projects.IntakeHost&gt;("intakehost")
+    .WithReference(blobs).WithReference(tables)
+    .WithReference(tools).WaitFor(tools);
+
+// Stage two: processing. Adds the conversation memory and a back-reference
+// to intake so it can post progress updates across the process boundary.
+var processing = builder.AddProject&lt;Projects.ProcessorHost&gt;("processorhost")
+    .WithReference(blobs).WithReference(tables).WithReference(memory)
+    .WithReference(tools).WaitFor(tools)
+    .WithReference(intake);
+
+builder.AddProject&lt;Projects.OperatorUi&gt;("operatorui")
+    .WithReference(intake).WithReference(tools);
+
+builder.Build().Run();</code></pre>
+      <div class="prose">
+        <p>Read that top to bottom and you've read the system's wiring diagram. Two storage handles (one for the bridge, one for finished work), a Cosmos database for run transcripts, the tool server, the two stages, and the UI. The <code>WaitFor(tools)</code> calls say "don't start the agents until the tools are up," and the <code>WithReference</code> calls are what give each service the connection details for the things it depends on. Notice the deliberate asymmetry: processing references intake (it posts progress back to it), but intake does not reference processing. Intake writes a work item and walks away. That one-way reference is the storage seam showing up in the wiring.</p>
+      </div>
+      <div class="callout">
+        <span class="callout-label">A general lesson, not an Aspire one</span>
+        <p>Even if you never touch Aspire, the principle travels: keep one declarative description of how your services and resources fit together, and make it environment-agnostic so local and production differ only in what the resource handles resolve to. Aspire is a tidy way to do this in .NET, but the value is in the single source of truth, not the specific API.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Inside a Service</span>
+        <h2>Wiring One Process, From Config to Agents</h2>
+        <p class="section-subhead">Each service has its own small root that turns configuration and credentials into ready-to-run agents.</p>
+      </header>
+      <div class="prose">
+        <p>Drop down a level into any one of the services and you find the familiar .NET host builder. Each service calls <code>AddServiceDefaults()</code>, the shared Aspire helper that turns on health checks, OpenTelemetry, and resilient HTTP handlers in one line, and then registers the handful of things it needs. The most important of those is the credential chain, because it's how the keyless design from the prerequisites chapter becomes real.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">var builder = WebApplication.CreateBuilder(args);
+builder.AddServiceDefaults(); // Aspire: health checks, OpenTelemetry, resilience
+
+// No API keys anywhere. One credential chain tries each source in order and
+// uses the first that works: your CLI login locally, managed identity in Azure.
+builder.Services.AddSingleton&lt;TokenCredential&gt;(new ChainedTokenCredential(
+    new AzureCliCredential(),
+    new EnvironmentCredential(),
+    new ManagedIdentityCredential()));
+
+// Everything the agents need is registered once, here, and injected elsewhere.
+builder.Services.AddSingleton&lt;IChatClientProvider, ChatClientProvider&gt;();
+builder.Services.AddSingleton&lt;EntityStore&gt;();
+builder.Services.AddSingleton&lt;AgentPool&gt;();
+
+var app = builder.Build();
+app.MapDefaultEndpoints();
+app.Run();</code></pre>
+      <div class="prose">
+        <p>The piece worth lingering on is <code>AgentPool</code>. Rather than scatter agent construction across the codebase, the system funnels it through one component that knows how to build a configured agent. When something needs the researcher, it asks the pool; it never news up a <code>ChatClientAgent</code> itself. That centralization is what lets the middleware stack from Chapter 11 be applied uniformly: the pool builds the model client, wraps it in the fluent chain, and hands back a finished agent.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// Inside AgentPool: build the model client, wrap it in cross-cutting layers,
+// then construct the agent. Every agent in the system is born this way.
+IChatClient client = chatClientProvider.GetChatClient()
+    .WithRateLimitRetry()
+    .WithAgent365Baggage(baggage)
+    .WithPurview(purviewOptions)
+    .WithOpenTelemetry()
+    .WithCompaction(compactionProvider);
+
+var researcher = new ChatClientAgent(client, new ChatClientAgentOptions
+{
+    Name = "ResearchAgent",
+    Instructions = researchInstructions,
+    ChatOptions = new ChatOptions { Tools = mcpTools }
+});</code></pre>
+      <div class="prose">
+        <p>Don't worry about what each <code>.With*</code> layer does yet; that's Chapter 11. The point here is structural: the agent is constructed in exactly one place, from injected dependencies, with its cross-cutting concerns layered on at birth. Everywhere else in the code, an agent is just something you were handed.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Why It Pays Off</span>
+        <h2>Keeping the Root Thin and Everything Else Ignorant</h2>
+        <p class="section-subhead">A disciplined composition root is what makes every later chapter's "just swap this" claim actually true.</p>
+      </header>
+      <div class="prose">
+        <p>It's tempting to treat the composition root as boilerplate and stop reading. Resist that, because the discipline here is what cashes out everywhere else in the guide. When the only place that constructs a model client is the agent pool, swapping Azure OpenAI for a hosted prompt agent is a change in one method, not a hunt through the codebase. When the only place that declares storage is the orchestrator, moving from emulators to real Azure is a publish-time concern, not a code change. When credentials come from an injected <code>TokenCredential</code>, the agents never learn whether they're running on your laptop or in the cloud.</p>
+        <p>The rule of thumb is simple: construct at the edges, inject everywhere else. The root knows how things are built; nothing else does. Keep that line clean and the system stays soft enough to reshape. Blur it (new up a client deep inside an agent, hardcode a connection string in a handler) and every future change gets a little harder.</p>
+        <p>With the wiring understood, we can start following the work. The first thing that runs after an event arrives is the intake stage, and it's built as an explicit two-node workflow graph. That's where we go next.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="04-high-level-architecture.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 4</span>
+        <span class="chapter-nav__title">High Level Architecture</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="06-intake-workflow-graph.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 6</span>
+        <span class="chapter-nav__title">The Intake Stage</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

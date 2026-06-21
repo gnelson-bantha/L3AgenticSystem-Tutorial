@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 13 · Correlation and Progress Across Hosts</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 13</p>
+      <h1 class="chapter-title">Correlation and Progress Across Hosts</h1>
+      <p class="chapter-subhead">One id that threads the whole pipeline, and progress that crosses the boundary between two separate processes.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Visibility Problem</span>
+        <h2>Following One Event Through Two Processes</h2>
+        <p class="section-subhead">The storage seam that bought us decoupling also took away the easy answer to "where is this event right now?"</p>
+      </header>
+      <div class="prose">
+        <p>The decoupling we worked so hard for has a flip side. Intake and processing are separate processes that never call each other, which is wonderful for scaling and terrible for answering a simple operator question: "I submitted an event a minute ago, what's happening to it?" There's no single call stack to follow, no one process that sees the whole journey. The event fans out into work items, those scatter across parallel runs in a different service, and nobody is holding the thread.</p>
+        <p>So the system holds the thread deliberately, with two complementary moves. First, a single correlation id is born the instant an event arrives and rides along on every artifact the event ever produces, so all of its scattered activity can be stitched back together after the fact. Second, the processing service actively reports progress back across the boundary, so the operator can watch in something close to real time. The id is for correlation; the reporting is for liveness. Together they give you a coherent view of a deliberately incoherent topology.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Golden Thread</span>
+        <h2>One Id, Stamped on Everything</h2>
+        <p class="section-subhead">Born at the front door, the correlation id ends up on the blob path, the work item, the telemetry, and the final deliverable.</p>
+      </header>
+      <div class="prose">
+        <p>When the event lands, intake mints one identifier and refuses to let go of it. It travels into the normalized event, becomes the prefix of every work-item blob path, rides inside each work item as its run id, tags every progress update, and lands on the finished deliverable. Trace any artifact in the system back and the same id is on it, which means "show me everything that came from that one event" is always answerable.</p>
+      </div>
+      <pre class="codeblock"><code class="language-text">The correlation id is minted once and stamped on every artifact downstream:
+
+  intake     InboundEvent(correlationId)  ->  WorkRequest(correlationId)
+  bridge     blob path:  {correlationId}/{targetId}.json
+  work item  WorkItem.WorkflowRunId == correlationId
+  progress   ProgressUpdate.CorrelationId
+  result     Deliverable.CorrelationId
+  telemetry  Agent 365 SessionId == correlationId   (the baggage from Chapter 11)</code></pre>
+      <div class="prose">
+        <p>That last line closes a loop from two chapters ago. The Agent 365 baggage built into the middleware stack uses this exact correlation id as its session id. So the identity telemetry emitted deep inside a model call, in a different process, is keyed to the same value that's on the blob path back in intake. You can pivot from a deliverable to its telemetry to its work items without ever guessing which records belong together. One worthwhile detail: as the Agent 365 SDK reached general availability it dropped its separate correlation field, so the session id is the carrier now. Folding correlation into the session id isn't a workaround; it's the supported way to group an event's activity.</p>
+      </div>
+      <div class="callout">
+        <span class="callout-label">Mint early, thread relentlessly</span>
+        <p>The discipline that makes this work is boring and absolute: create the id at the very first point of entry, put it on every record and message that follows, and reuse it as the key for logs, metrics, and traces. It costs almost nothing at the start and is nearly impossible to retrofit later. In a fan-out system with no shared call stack, this single thread is often the only thing standing between you and an unobservable mess.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Phoning Home</span>
+        <h2>Reporting Progress Back Across the Boundary</h2>
+        <p class="section-subhead">Processing has no screen of its own, so it tells intake what's happening over plain HTTP.</p>
+      </header>
+      <div class="prose">
+        <p>The processing service runs headless in the background; it has no UI. The operator UI, meanwhile, lives next to the intake host. So processing reports progress to intake, and intake becomes the single place that knows the current state of every event. The mechanism is refreshingly ordinary: processing makes HTTP calls to a couple of endpoints on the intake host, one for incremental progress and one to mark a target complete.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">public sealed class ProgressReporter(HttpClient intake)
+{
+    // Incremental update as a run moves through its stages.
+    public Task ReportAsync(ProgressUpdate update) =&gt;
+        intake.PostAsJsonAsync("/api/workflow/progress", update);
+
+    // Fired when one target's deliverable is finished (or finished-as-draft).
+    public Task CompleteAsync(string correlationId, string targetId) =&gt;
+        intake.PostAsJsonAsync("/api/workflow/complete",
+            new CompletionUpdate(correlationId, targetId));
+}</code></pre>
+      <div class="prose">
+        <p>The detail that keeps this clean is how processing finds intake. It doesn't hardcode a URL. The HTTP client is configured against the intake service's logical name, and Aspire's service discovery resolves that name to the right address in whatever environment you're running, your laptop or the cloud. This is the back-reference from the orchestrator chapter showing up in code: the wiring said processing references intake, and here's what that reference is for.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// No hardcoded address. Aspire resolves the logical service name "intakehost"
+// to the real endpoint, the same locally and in production.
+builder.Services.AddHttpClient&lt;ProgressReporter&gt;(c =&gt;
+    c.BaseAddress = new Uri("https+http://intakehost"));</code></pre>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Window In</span>
+        <h2>The Operator's View</h2>
+        <p class="section-subhead">With intake aggregating everything by correlation id, the UI just has to ask and render.</p>
+      </header>
+      <div class="prose">
+        <p>Because intake collects every progress and completion report, it can answer "what's the state of everything?" in one call. The operator UI polls a status endpoint and gets back a list keyed by correlation id, with the detected, in-flight, and completed counts for each event, drawn from the same thread-safe tally the bridge maintained back in Chapter 8. The UI gives each event its own tab and shows the familiar "this many of that many done," ticking up as completion reports arrive.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// Intake has aggregated everything by correlation id; the UI just polls and renders.
+var events = await http.GetFromJsonAsync&lt;IReadOnlyList&lt;EventStatus&gt;&gt;(
+    "/api/workflow/status");
+
+// EventStatus per event: correlation id, detected / inFlight / completed counts,
+// and the per-target state behind each event's tab.</code></pre>
+      <div class="prose">
+        <p>It's worth noticing how little the UI has to know. It doesn't talk to processing, doesn't read the bridge, doesn't understand the agents. It asks intake one question and draws the answer. All the cross-process complexity was absorbed by the correlation id and the progress reports, leaving the front end with an almost trivial job. That's the payoff of doing the threading properly: visibility becomes a rendering problem instead of a distributed-systems problem.</p>
+        <p>This progress plumbing also quietly sets up the final piece of the pattern. The status the operator sees includes deliverables that finished, and a finished deliverable is something a human might want to push back on. Re-opening one and sending it back through the same agents is the last behavior we'll build, and it's next.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="12-context-compaction.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 12</span>
+        <span class="chapter-nav__title">Context Management with a Compaction Pipeline</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="14-human-in-the-loop-revision.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 14</span>
+        <span class="chapter-nav__title">Human-in-the-Loop Revision</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

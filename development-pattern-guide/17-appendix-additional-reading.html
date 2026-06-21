@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 17 · Appendix: Additional Reading</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 17</p>
+      <h1 class="chapter-title">Appendix: Additional Reading</h1>
+      <p class="chapter-subhead">The primary sources for every piece of the stack this pattern leaned on, so you can go build your own.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">How to Use This</span>
+        <h2>Going Deeper on the Stack</h2>
+        <p class="section-subhead">The pattern is portable, but the implementation we studied used a specific set of Microsoft technologies. Here's where to learn each one properly.</p>
+      </header>
+      <div class="prose">
+        <p>This guide deliberately stayed at the level of the pattern, leaning on the underlying technologies just enough to make each idea concrete. When you go to build something like it, you'll want the real documentation for the pieces you choose. The list below is grouped roughly the way the chapters were: the agent framework and its orchestration first, then the tool protocol, then the governance and observability layers, then the Azure services that act as the durable seams, and finally the deployment tooling. Every link points to official, primary material for the corresponding part of the stack.</p>
+      </div>
+
+      <div class="resource-list">
+        <div class="resource-card">
+          <h3>Microsoft Agent Framework (Documentation)</h3>
+          <p>The framework behind the agents, the workflow graph from the intake stage, and the Group Chat orchestration with its manager and termination rules. Start here for chat clients, agents, workflows, and the multi-agent patterns the collaboration stage is built on.</p>
+          <a href="https://learn.microsoft.com/en-us/agent-framework/">https://learn.microsoft.com/en-us/agent-framework/</a>
+        </div>
+        <div class="resource-card">
+          <h3>Microsoft Agent Framework (Source and Samples)</h3>
+          <p>The open-source repository, including the workflow and Group Chat APIs, the delegating chat-client middleware surface, and the experimental context-compaction strategies covered in the compaction chapter. Read the samples alongside the docs.</p>
+          <a href="https://github.com/microsoft/agent-framework">https://github.com/microsoft/agent-framework</a>
+        </div>
+        <div class="resource-card">
+          <h3>Aspire</h3>
+          <p>The orchestration and composition model that defines the system's resources once and runs them against local emulators or real cloud services. Covers the AppHost, service discovery, resource references, and run-versus-publish deployment, the backbone of the composition-root and deployment chapters.</p>
+          <a href="https://learn.microsoft.com/en-us/dotnet/aspire/">https://learn.microsoft.com/en-us/dotnet/aspire/</a>
+        </div>
+        <div class="resource-card">
+          <h3>Model Context Protocol (Specification)</h3>
+          <p>The open protocol that puts tools behind a process boundary, as in the tool-access chapter. The specification defines tool discovery, invocation, and transports, and explains why an agent and its tools can evolve and scale independently.</p>
+          <a href="https://modelcontextprotocol.io">https://modelcontextprotocol.io</a>
+        </div>
+        <div class="resource-card">
+          <h3>Model Context Protocol C# SDK</h3>
+          <p>The .NET implementation used to build the tool server and connect clients to it, including the server-tool attributes, HTTP transport, and the client-side tool abstractions the agents call through.</p>
+          <a href="https://github.com/modelcontextprotocol/csharp-sdk">https://github.com/modelcontextprotocol/csharp-sdk</a>
+        </div>
+        <div class="resource-card">
+          <h3>Azure AI Foundry</h3>
+          <p>The platform for hosted agents and model deployments. Relevant when you swap an agent's backend for a Foundry-defined agent reached through the project client, as discussed in the extending chapter, and for managing the models the agents run against.</p>
+          <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/">https://learn.microsoft.com/en-us/azure/ai-foundry/</a>
+        </div>
+        <div class="resource-card">
+          <h3>Azure OpenAI</h3>
+          <p>The model backend the agents call, wired up as a referenced resource in the AppHost. Covers deployments, the chat completions surface the chat client sits on top of, and the keyless authentication path the system relies on.</p>
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/openai/">https://learn.microsoft.com/en-us/azure/ai-services/openai/</a>
+        </div>
+        <div class="resource-card">
+          <h3>Identity and Governance for Agents (Microsoft Purview and Agent 365)</h3>
+          <p>The governance and identity layers applied as middleware: Microsoft Purview for data governance over agent interactions, and the Agent 365 baggage that stamps tenant, session, and agent identity onto each call. Purview's documentation is the entry point for the governance side.</p>
+          <a href="https://learn.microsoft.com/en-us/purview/">https://learn.microsoft.com/en-us/purview/</a>
+        </div>
+        <div class="resource-card">
+          <h3>OpenTelemetry in .NET</h3>
+          <p>The observability standard the telemetry middleware emits into, and which the deployment sends to Application Insights. Covers traces, metrics, and logs in .NET, the foundation for following an autonomous run you didn't watch happen.</p>
+          <a href="https://learn.microsoft.com/en-us/dotnet/core/diagnostics/observability-with-otel">https://learn.microsoft.com/en-us/dotnet/core/diagnostics/observability-with-otel</a>
+        </div>
+        <div class="resource-card">
+          <h3>Azure Cosmos DB</h3>
+          <p>The session store that persists each run's transcript, revision count, and feedback history, the thing that makes human-in-the-loop revision a resume rather than a restart. Covers containers, partition keys, and the local emulator used in development.</p>
+          <a href="https://learn.microsoft.com/en-us/azure/cosmos-db/">https://learn.microsoft.com/en-us/azure/cosmos-db/</a>
+        </div>
+        <div class="resource-card">
+          <h3>Azure Storage (Blobs and Tables)</h3>
+          <p>The durable storage bridge between the intake and processing stages, where work items are written, claimed, and processed in parallel. Covers Blob and Table storage and the Azurite emulator that stands in for them locally.</p>
+          <a href="https://learn.microsoft.com/en-us/azure/storage/">https://learn.microsoft.com/en-us/azure/storage/</a>
+        </div>
+        <div class="resource-card">
+          <h3>Keyless Authentication with Azure Identity</h3>
+          <p>The credential model behind the no-keys posture: a chained credential that resolves to your developer sign-in locally and to a managed identity in the cloud, with the same code in both places. The reference for the deployment chapter's identity story.</p>
+          <a href="https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication/">https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication/</a>
+        </div>
+        <div class="resource-card">
+          <h3>Azure Container Apps and the Azure Developer CLI</h3>
+          <p>The deployment target and tooling for publish mode. Container Apps hosts the services, and the Azure Developer CLI provisions the resources described in the AppHost and ships the containers, turning one description into a running cloud system.</p>
+          <a href="https://learn.microsoft.com/en-us/azure/container-apps/">https://learn.microsoft.com/en-us/azure/container-apps/</a>
+        </div>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Last Word</span>
+        <h2>Now Go Build One</h2>
+        <p class="section-subhead">The pattern matters more than any single library on this page.</p>
+      </header>
+      <div class="prose">
+        <p>If you take nothing else from this guide, take the shape: an autonomous, multi-stage agent pipeline whose stages are decoupled by durable storage, fanned out for parallelism, self-corrected by a bounded generate-and-review loop, and wrapped in composable middleware for everything cross-cutting. Every technology on this page is replaceable. The seams between them are the design. Build along those seams and your own system will be observable, extensible, and honest about what it does on its own, which is the whole point of working at Level 3.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="16-deployment.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 16</span>
+        <span class="chapter-nav__title">Deployment</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

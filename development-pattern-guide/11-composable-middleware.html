@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 11 · Composable Middleware for the Agent Client</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 11</p>
+      <h1 class="chapter-title">Composable Middleware for the Agent Client</h1>
+      <p class="chapter-subhead">Stacking retry, Agent 365 identity telemetry, Microsoft Purview governance, OpenTelemetry, and compaction as layers around each agent's model client.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Idea</span>
+        <h2>One Seam, Many Concerns</h2>
+        <p class="section-subhead">Every cross-cutting worry hangs off a single interface, and that's what keeps the agents clean.</p>
+      </header>
+      <div class="prose">
+        <p>The agents you've watched do their work have stayed remarkably free of clutter. The researcher researches, the generator writes, the reviewer reviews. None of them contain a line about retrying a throttled call, emitting a trace, checking a governance policy, or trimming their own history. That's not an accident, and it's not because those concerns were skipped. They're all present; they just live somewhere else.</p>
+        <p>The trick rests on one seam: <code>IChatClient</code>, the interface every agent uses to talk to the model. Because every model call flows through that one interface, you can wrap it. A wrapper implements <code>IChatClient</code> too, holds a reference to an inner <code>IChatClient</code>, does its bit (before, after, or around the call), and delegates the rest inward. Stack several of those wrappers and you've built a middleware pipeline for model calls, exactly like the request pipeline in a web framework, but for the agent's connection to the model.</p>
+      </div>
+      <div class="pull-quote">
+        <p>If every call goes through one interface, that interface is the place to add everything the call should also do.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Assembly</span>
+        <h2>Building the Chain, Layer by Layer</h2>
+        <p class="section-subhead">A handful of fluent extension methods turn a bare client into a fully instrumented one.</p>
+      </header>
+      <div class="prose">
+        <p>The system collects these wrappers as fluent extension methods, each one a <code>With*</code> on <code>IChatClient</code> that returns a new <code>IChatClient</code>. Building a production-grade client is then just a readable chain. This is the code the agent pool runs when it constructs every agent.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// Read top to bottom as innermost to outermost. The first layer sits closest to
+// the model; the last layer is the outermost shell that sees a request first.
+IChatClient client = baseChatClient
+    .WithRateLimitRetry()                  // retry throttled Azure OpenAI calls
+    .WithAgent365Baggage(baggage)          // stamp Agent 365 identity telemetry
+    .WithPurview(purviewOptions)           // apply Microsoft Purview governance
+    .WithOpenTelemetry()                   // emit OpenTelemetry traces and metrics
+    .WithCompaction(compactionProvider);   // trim history to fit the context window</code></pre>
+      <div class="prose">
+        <p>Each method follows the same two-line shape: if the concern is configured, wrap; otherwise hand the inner client straight back. That second branch is important and we'll come back to it, but here's the form, using the governance layer as the example.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">public static IChatClient WithPurview(this IChatClient inner, PurviewOptions? options)
+{
+    // Graceful no-op: if Purview isn't configured, return the inner client untouched.
+    if (options is null || !options.Enabled)
+        return inner;
+
+    return new PurviewChatClient(inner, options);
+}</code></pre>
+      <div class="prose">
+        <p>The wrappers themselves derive from <code>DelegatingChatClient</code>, which forwards every call to the inner client by default, so each wrapper only overrides the one method it cares about and lets everything else pass through. The retry layer is the clearest example: it does its whole job by catching one kind of failure and trying again.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">internal sealed class RateLimitRetryingChatClient(IChatClient inner)
+    : DelegatingChatClient(inner)
+{
+    public override async Task&lt;ChatResponse&gt; GetResponseAsync(
+        IEnumerable&lt;ChatMessage&gt; messages, ChatOptions? options, CancellationToken ct)
+    {
+        for (var attempt = 0; ; attempt++)
+        {
+            try { return await base.GetResponseAsync(messages, options, ct); }
+            catch (ClientResultException e) when (e.Status == 429 && attempt &lt; MaxRetries)
+            {
+                // Honor the service's back-off hint, then try again.
+                await Task.Delay(RetryAfter(e, attempt), ct);
+            }
+        }
+    }
+}</code></pre>
+      <div class="callout">
+        <span class="callout-label">Order is behavior, not style</span>
+        <p>A request enters at the outermost layer and travels inward to the model, then the response unwinds back out. So compaction trims the history first (no point tracing or governing messages you're about to drop), the trace span wraps the governed-and-retried call so its timing is honest, and retry sits innermost, right against the model, so a throttled attempt is retried without re-running everything above it. Reorder the chain and you change what actually happens, not just how it reads.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Layers</span>
+        <h2>What Each Layer Actually Does</h2>
+        <p class="section-subhead">Five concerns, five wrappers, each one a real Microsoft capability snapped onto the same seam.</p>
+      </header>
+      <div class="prose">
+        <p>This is the part where the concrete names matter, because each layer is a specific integration you'd want to know by name when you build your own. Here's the full stack, from the model outward.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>WithRateLimitRetry</h3>
+          <p>The <code>RateLimitRetryingChatClient</code>. Catches the throttling responses Azure OpenAI returns under load, waits for the service's suggested back-off, and retries. Sits innermost so a retry repeats only the model call, not the whole pipeline.</p>
+        </div>
+        <div class="info-card">
+          <h3>WithAgent365Baggage</h3>
+          <p>The <code>Agent365BaggageChatClient</code>. Stamps Agent 365 identity telemetry onto every call: tenant, session, agent id, and agent name, built with a <code>BaggageBuilder</code>. The session is the pipeline's correlation id, so Agent 365 can group an entire event's activity.</p>
+        </div>
+        <div class="info-card">
+          <h3>WithPurview</h3>
+          <p>The <code>PurviewChatClient</code>. Routes content through Microsoft Purview so the same data-governance and compliance policies that cover the rest of your estate cover what the agents send and receive. Unconfigured, it returns the inner client unchanged.</p>
+        </div>
+        <div class="info-card">
+          <h3>WithOpenTelemetry</h3>
+          <p>Wraps the call in an OpenTelemetry span, emitting traces and metrics for each model interaction. Those flow through the standard exporters that <code>AddServiceDefaults</code> set up, so model calls show up in the same traces as everything else.</p>
+        </div>
+        <div class="info-card">
+          <h3>WithCompaction</h3>
+          <p>Hooks in the Agent Framework's <code>CompactionProvider</code> to keep the conversation within the model's context window over a long, multi-turn run. It's the outermost layer, and it's involved enough to get its own chapter next.</p>
+        </div>
+        <div class="info-card">
+          <h3>One more job for baggage</h3>
+          <p>The Agent 365 layer also tidies the message stream: it sanitizes orphaned function-call content that can otherwise make Azure OpenAI reject a request. That matters for the hosted-agent path below, where messages arrive shaped slightly differently.</p>
+        </div>
+      </div>
+      <div class="prose">
+        <p>The identity telemetry layer is worth one concrete look, because the baggage it builds is what ties the model-call view in Agent 365 back to the rest of the system. It's assembled from ids the pipeline already has on hand.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// Built once per agent and handed to .WithAgent365Baggage(...). The session id is
+// the very same correlation id that threads intake, the bridge, and processing.
+var baggage = new BaggageBuilder()
+    .TenantId(tenantId)
+    .SessionId(correlationId)
+    .AgentId(agent.Id)
+    .AgentName(agent.Name)
+    .Build();</code></pre>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Payoff</span>
+        <h2>Optional by Design, the Same Code Everywhere</h2>
+        <p class="section-subhead">Because each layer disappears when unconfigured, one agent runs bare on your laptop and fully governed in production.</p>
+      </header>
+      <div class="prose">
+        <p>Remember that second branch in each extension method, the one that returns the inner client untouched when the concern isn't configured? That single decision is what makes the whole stack practical. Every layer is independently optional and degrades to a clean no-op. On your laptop with nothing configured, the chain collapses to the bare client and the agents run with no Purview, no Agent 365, no exporters. In production, the same chain lights up every layer. The agent code never changes; only the environment does. This is the optionality the prerequisites chapter promised, finally cashed out.</p>
+        <p>It also explains how the optional hosted-agent path fits in without disturbing anything. The research agent can be configured to run as a hosted Azure AI Foundry prompt agent instead of calling Azure OpenAI directly, constructed by turning a project client into an agent with <code>AIProjectClient.AsAIAgent(new AgentReference(...))</code>. Its instructions live server-side, but its model calls still flow through an <code>IChatClient</code>, so the exact same middleware chain wraps it. The Foundry agent gets the same retry, the same Agent 365 baggage, the same governance and tracing, with no special-casing. The seam is what makes the swap free.</p>
+      </div>
+      <div class="important-banner">
+        <span class="callout-label">The reusable pattern</span>
+        <p>Find the one interface every important call passes through, then express each cross-cutting concern as an optional decorator over it. Compose them in a deliberate order, and make every layer degrade to a no-op when it isn't configured. You get production concerns without touching business logic, environment differences without code differences, and new concerns added by writing one more wrapper. It costs you the discipline of routing everything through that one seam, which is a discipline worth keeping.</p>
+      </div>
+      <div class="prose">
+        <p>We've named the outermost layer but waved at what it does. Keeping a multi-turn, self-correcting conversation inside a fixed context window is a genuine problem with a genuinely clever solution, so compaction gets the next chapter to itself.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="10-self-correcting-feedback-loop.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 10</span>
+        <span class="chapter-nav__title">The Self-Correcting Feedback Loop</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="12-context-compaction.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 12</span>
+        <span class="chapter-nav__title">Context Management with a Compaction Pipeline</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

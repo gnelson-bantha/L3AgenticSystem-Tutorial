@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 10 · The Self-Correcting Feedback Loop</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("guide-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/default-global.css">
+  <script src="assets/vendor/highlight.min.js" defer></script>
+  <script src="assets/guide.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="toc-flyout" aria-label="Table of contents">
+    <button class="toc-flyout__tab" type="button" aria-controls="toc-flyout-panel">Contents</button>
+    <div class="toc-flyout__panel" id="toc-flyout-panel">
+      <p class="toc-flyout__title">Contents</p>
+      <ol class="toc-flyout__list">
+        <li><a class="toc-flyout__link" href="index.html"><span class="num">00</span><span>Contents</span></a></li>
+        <li><a class="toc-flyout__link" href="01-introduction.html"><span class="num">01</span><span>Introduction</span></a></li>
+        <li><a class="toc-flyout__link" href="02-sourced-repository.html"><span class="num">02</span><span>Sourced Repository</span></a></li>
+        <li><a class="toc-flyout__link" href="03-prerequisites.html"><span class="num">03</span><span>Prerequisites</span></a></li>
+        <li><a class="toc-flyout__link" href="04-high-level-architecture.html"><span class="num">04</span><span>High Level Architecture</span></a></li>
+        <li><a class="toc-flyout__link" href="05-composition-root.html"><span class="num">05</span><span>The Composition Root</span></a></li>
+        <li><a class="toc-flyout__link" href="06-intake-workflow-graph.html"><span class="num">06</span><span>The Intake Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="07-tool-access-mcp.html"><span class="num">07</span><span>Tool Access Through a Protocol Boundary</span></a></li>
+        <li><a class="toc-flyout__link" href="08-storage-bridge.html"><span class="num">08</span><span>The Storage Bridge for Parallel Scale</span></a></li>
+        <li><a class="toc-flyout__link" href="09-group-chat-orchestration.html"><span class="num">09</span><span>The Collaboration Stage</span></a></li>
+        <li><a class="toc-flyout__link" href="10-self-correcting-feedback-loop.html"><span class="num">10</span><span>The Self-Correcting Feedback Loop</span></a></li>
+        <li><a class="toc-flyout__link" href="11-composable-middleware.html"><span class="num">11</span><span>Composable Middleware for the Agent Client</span></a></li>
+        <li><a class="toc-flyout__link" href="12-context-compaction.html"><span class="num">12</span><span>Context Management with a Compaction Pipeline</span></a></li>
+        <li><a class="toc-flyout__link" href="13-correlation-and-progress.html"><span class="num">13</span><span>Correlation and Progress Across Hosts</span></a></li>
+        <li><a class="toc-flyout__link" href="14-human-in-the-loop-revision.html"><span class="num">14</span><span>Human-in-the-Loop Revision</span></a></li>
+        <li><a class="toc-flyout__link" href="15-extending-the-system.html"><span class="num">15</span><span>Extending the System</span></a></li>
+        <li><a class="toc-flyout__link" href="16-deployment.html"><span class="num">16</span><span>Deployment</span></a></li>
+        <li><a class="toc-flyout__link" href="17-appendix-additional-reading.html"><span class="num">17</span><span>Appendix: Additional Reading</span></a></li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="site-header">
+    <a class="site-brand" href="index.html">
+      <span class="site-brand__mark">◆</span>
+      <span class="site-brand__name">Level 3 Agentic System</span>
+    </a>
+    <div class="site-header__right">
+      <p class="site-header__meta">Pattern Tutorial</p>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle light/dark theme">
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <header class="chapter-header">
+      <p class="chapter-eyebrow">Chapter 10</p>
+      <h1 class="chapter-title">The Self-Correcting Feedback Loop</h1>
+      <p class="chapter-subhead">A reviewer that can send work back, and a hard cap that guarantees the loop always ends.</p>
+    </header>
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">The Core Problem</span>
+        <h2>Quality Without a Human Gate</h2>
+        <p class="section-subhead">This is the chapter that earns the word "autonomous," because it's how output gets trusted with nobody watching.</p>
+      </header>
+      <div class="prose">
+        <p>Back in the introduction we raised the uncomfortable question at the center of Level 3 autonomy: if no human checks the work, what stops the system from confidently shipping something wrong? Every other chapter has been infrastructure leading to this one. Here's the answer the system gives: put the check inside the loop. Instead of a person reviewing the output, a peer agent reviews it, and it can send the work back for another pass.</p>
+        <p>The rhythm is generate, review, revise, repeat. The generator drafts the deliverable. The reviewer reads it against the brief and either approves it or returns specific, actionable feedback. If it's feedback, the team goes around again: the generator revises in light of the critique, the reviewer takes another look. The loop continues until the reviewer is satisfied. Because the critique is concrete and the generator can see the full conversation, each lap tends to be genuinely better than the last. That's what "self-correcting" means here, and it's how you get trustworthy output without a human in the execution path.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Termination, Part One</span>
+        <h2>Teaching the Manager to Stop on Approval</h2>
+        <p class="section-subhead">The loop ends the moment the reviewer says the magic word, and the manager is what listens for it.</p>
+      </header>
+      <div class="prose">
+        <p>Recall from the last chapter that the Group Chat manager decides when the conversation is done. The default round-robin manager stops after a set number of turns, which is the wrong signal: we want to stop when the work is approved, not when the clock runs out. So the system subclasses the round-robin manager and overrides its termination check to watch for the reviewer's approval marker.</p>
+        <p>The reviewer is instructed to begin its message with one exact word, <code>APPROVED</code>, when and only when the deliverable is good. The manager checks the most recent reviewer message for that word. If it's there, the chat terminates and the deliverable is final. If it's not, the reviewer's message is treated as revision feedback and the loop continues.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">public sealed class ApprovalGroupChatManager : RoundRobinGroupChatManager
+{
+    private const string ApprovalToken = "APPROVED";
+
+    public ApprovalGroupChatManager(int maxIterations, int agentCount = 3)
+    {
+        // The hard ceiling, derived below. Belt to the approval check's braces.
+        MaximumIterationCount = (maxIterations + 1) * agentCount;
+    }
+
+    public override ValueTask&lt;bool&gt; ShouldTerminateAsync(
+        GroupChatThread thread, CancellationToken ct)
+    {
+        // Find the reviewer's latest verdict in the shared transcript.
+        var verdict = thread.Messages
+            .LastOrDefault(m =&gt; m.AuthorName == "ReviewerAgent")?.Text?.TrimStart();
+
+        // Approval is the happy path: stop immediately.
+        if (verdict is not null &&
+            verdict.StartsWith(ApprovalToken, StringComparison.OrdinalIgnoreCase))
+        {
+            return ValueTask.FromResult(true);
+        }
+
+        // No approval yet: defer to the round-robin cap so the loop can't run forever.
+        return base.ShouldTerminateAsync(thread, ct);
+    }
+}</code></pre>
+      <div class="prose">
+        <p>The defensive details matter. The check trims leading whitespace and compares case-insensitively, because you don't want a stray space or a lowercase "approved" to prevent the system from ever recognizing success. The marker is a distinctive single word so it's unlikely to appear by accident in the middle of normal feedback. This is the careful handling of natural-language signals that the previous chapter promised.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Termination, Part Two</span>
+        <h2>Bounding the Loop So It Always Ends</h2>
+        <p class="section-subhead">Approval is the way out you hope for; the cap is the way out you guarantee.</p>
+      </header>
+      <div class="prose">
+        <p>A reviewer that approves is the happy path. But what about a reviewer that's never quite satisfied? Maybe the task is genuinely hard, maybe the brief is contradictory, maybe the model just keeps finding nits. Without a backstop, the generate-and-review loop could run forever, burning tokens and never finishing. An autonomous system absolutely cannot have an unbounded loop, so the manager keeps a hard ceiling on total turns regardless of approval.</p>
+        <p>The ceiling is computed, not guessed. The idea is to allow a fixed number of revision iterations plus one initial pass, and since every iteration is one full round of the whole team, you multiply by the number of participants. With a default of three revisions and three agents, that's four full passes of three speakers, twelve turns, after which the manager stops no matter what.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">// (maxIterations + 1) accounts for the initial pass plus the allowed revisions.
+// Multiplying by the team size converts "iterations" into "speaker turns", since
+// one iteration is one full round-robin lap of every participant.
+MaximumIterationCount = (maxIterations + 1) * agentCount;
+//   default: (3 + 1) * 3 = 12 turns, then the loop stops unconditionally.</code></pre>
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>Why a count, not a timeout</h3>
+          <p>A turn count is deterministic and easy to reason about. You can say exactly how many model calls a run can cost in the worst case, which matters when thousands of runs go in parallel.</p>
+        </div>
+        <div class="info-card">
+          <h3>Why tie it to iterations</h3>
+          <p>Expressing the cap as "allowed revisions" keeps the knob meaningful. You tune how many improvement passes you'll pay for, and the turn math follows from the team size.</p>
+        </div>
+        <div class="info-card">
+          <h3>Why bound at all</h3>
+          <p>Autonomy plus an unbounded loop is a runaway bill and a hung pipeline waiting to happen. The cap is the single line that makes "runs on its own" safe to actually deploy.</p>
+        </div>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
+        <span class="eyebrow">Honesty</span>
+        <h2>Failing Honestly When the Cap Wins</h2>
+        <p class="section-subhead">Hitting the ceiling without approval is a real outcome, and the system refuses to dress it up as success.</p>
+      </header>
+      <div class="prose">
+        <p>So the loop hit twelve turns and the reviewer still hasn't approved. What now? The wrong move is to quietly save the last draft as if it were finished and fire the same "all done" notification. That would launder an unfinished, unapproved deliverable into the record and tell everyone downstream it's good. In an autonomous system, that kind of dishonest success is exactly the failure mode you're trying to avoid.</p>
+        <p>So the system marks the outcome for what it is. The deliverable gets a distinct status that means "draft, not approved," a recorded reason explaining the loop ran out of revisions, and the reviewer's outstanding feedback appended right onto the document so a human can see precisely what was still wrong. Crucially, the success notification is suppressed: nobody gets told this one is finished, because it isn't.</p>
+      </div>
+      <pre class="codeblock"><code class="language-csharp">var approved = result.WasApproved;   // did the reviewer sign off before the cap?
+
+var deliverable = new Deliverable(item, result.FinalText);
+
+if (!approved)
+{
+    // Tell the truth: this is a draft that ran out of revision budget.
+    deliverable.Status       = DeliverableStatus.DraftIncomplete;
+    deliverable.StatusReason = "Reached the revision cap without reviewer approval.";
+    deliverable.Body        += "\n\n## Outstanding Reviewer Feedback\n"
+                             + result.LastReviewerFeedback;
+}
+
+// Persist either way, but only announce completion when it's genuinely complete.
+await SaveDeliverableAsync(deliverable, notifyOnSuccess: approved);</code></pre>
+      <div class="important-banner">
+        <span class="callout-label">The principle worth stealing</span>
+        <p>An autonomous system will hit its limits sometimes, and the measure of a good one is what it does at the limit. Surface the incomplete state, attach the evidence of what's wrong, and stay silent on the success channel. A pipeline that fails loudly and honestly is one you can trust to run unattended; a pipeline that hides its failures is not.</p>
+      </div>
+      <div class="prose">
+        <p>That completes the engine room of the pattern: decoupled stages, parallel fan-out, and now a bounded, self-correcting loop that knows when to stop and how to admit when it couldn't finish. What's left is the cross-cutting machinery that wraps around all of it. Every model call these agents just made passed through a stack of middleware for retry, telemetry, governance, and more, and how that stack is built is one of the most reusable ideas in the whole system. That's next.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    <a class="chapter-nav__link chapter-nav__prev" href="09-group-chat-orchestration.html">
+      <span class="chapter-nav__dir">← Previous</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 9</span>
+        <span class="chapter-nav__title">The Collaboration Stage</span>
+      </span>
+    </a>
+    <a class="chapter-nav__link chapter-nav__next" href="11-composable-middleware.html">
+      <span class="chapter-nav__dir">Next →</span>
+      <span class="chapter-nav__label">
+        <span class="chapter-nav__num">Chapter 11</span>
+        <span class="chapter-nav__title">Composable Middleware for the Agent Client</span>
+      </span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>
+  </footer>
+</body>
+</html>

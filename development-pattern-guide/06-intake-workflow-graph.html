@@ -168,7 +168,7 @@ await workflow.RunAsync(new InboundEvent(correlationId, rawText));</code></pre>
       </header>
       <div class="prose">
         <p>It would be easy to make intake "helpful" by having it kick off processing for each work item it creates. Don't. The moment intake calls into processing, you've welded the two stages together: they now have to be deployed together, scaled together, and they fail together. Every reason we split the system in the first place evaporates.</p>
-        <p>So intake stops at the storage edge on purpose. Its contract with the rest of the system is exactly one thing: work items appear in the bridge. What reads them, when, and how many at a time is none of its business. That restraint is what keeps intake cheap and fast (it runs once per event and exits) while processing stays free to scale on its own terms.</p>
+        <p>So intake stops at the storage edge on purpose. Its contract with the rest of the system is exactly one thing: work items appear in the bridge. What reads them, when, and how many at a time is none of its business. That restraint is what keeps intake cheap and fast &mdash; a fresh intake instance is spawned for each incoming event, does its short run, and exits &mdash; while processing stays free to scale on its own terms.</p>
         <p>Two threads run out of this chapter. One is the tools the selector used to query target data, which deserve a close look because they live behind a protocol boundary on purpose. The other is the storage bridge those work items landed in. We'll take the tools first, since the selector just leaned on them, and come back to the bridge in Chapter 8.</p>
       </div>
     </section>

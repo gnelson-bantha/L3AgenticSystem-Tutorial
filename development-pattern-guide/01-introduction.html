@@ -125,13 +125,84 @@
       </header>
       <div class="prose">
         <p>If you remember nothing else from this chapter, remember the seam. The system is two services that never speak to each other directly. They speak through a storage container, and that indirection is load-bearing.</p>
+        <figure class="seam-figure">
+          <svg viewBox="0 0 960 340" role="img" aria-labelledby="seam-fig-title seam-fig-desc">
+            <title id="seam-fig-title">The storage seam between the intake and processing stages</title>
+            <desc id="seam-fig-desc">A new intake instance handles each incoming event and writes one work item per affected entity into a storage container. The processing stage reads each item and runs it as its own parallel job. The two services never call each other directly, and both scale out independently.</desc>
+            <defs>
+              <marker id="seam-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M0,0 L8,4.5 L0,9 z" class="seam-figure__arrowhead"/>
+              </marker>
+            </defs>
+
+            <!-- the seam -->
+            <line class="seam-figure__seam" x1="480" y1="46" x2="480" y2="300"/>
+            <text class="seam-figure__seam-label" x="480" y="34" text-anchor="middle">THE SEAM</text>
+
+            <!-- intake stage (stacked cards: a fresh instance per event) -->
+            <rect class="seam-figure__stack" x="48" y="126" width="210" height="120" rx="16"/>
+            <rect class="seam-figure__stack" x="59" y="138" width="210" height="120" rx="16"/>
+            <rect class="seam-figure__node" x="70" y="150" width="210" height="120" rx="16"/>
+
+            <!-- processing stage (stacked cards suggest parallel runs) -->
+            <rect class="seam-figure__stack" x="712" y="126" width="196" height="116" rx="16"/>
+            <rect class="seam-figure__stack" x="701" y="138" width="196" height="116" rx="16"/>
+            <rect class="seam-figure__node" x="690" y="150" width="196" height="116" rx="16"/>
+
+            <!-- storage container -->
+            <path class="seam-figure__store" d="M422,150 L422,250 A58,16 0 0 0 538,250 L538,150"/>
+            <ellipse class="seam-figure__store-top" cx="480" cy="150" rx="58" ry="16"/>
+
+            <!-- edges -->
+            <path class="seam-figure__edge" d="M280,208 L414,206" marker-end="url(#seam-arrow)"/>
+            <path class="seam-figure__edge" d="M540,200 L684,180" marker-end="url(#seam-arrow)"/>
+            <path class="seam-figure__edge" d="M540,206 L684,208" marker-end="url(#seam-arrow)"/>
+            <path class="seam-figure__edge" d="M540,212 L684,236" marker-end="url(#seam-arrow)"/>
+
+            <!-- labels -->
+            <text class="seam-figure__title" x="175" y="202" text-anchor="middle">Intake Stage</text>
+            <text class="seam-figure__sub" x="175" y="226" text-anchor="middle">normalize · select · write</text>
+
+            <text class="seam-figure__title" x="788" y="202" text-anchor="middle">Processing Stage</text>
+            <text class="seam-figure__sub" x="788" y="226" text-anchor="middle">research · write · review</text>
+
+            <text class="seam-figure__store-label" x="480" y="292" text-anchor="middle">Storage Container</text>
+
+            <text class="seam-figure__edge-label" x="347" y="192" text-anchor="middle">writes work items</text>
+            <text class="seam-figure__edge-label" x="610" y="166" text-anchor="middle">one run per item</text>
+          </svg>
+          <figcaption>Two services that never call each other, joined only by a storage container &mdash; a fresh intake instance per incoming event on the left, a parallel processing run per work item on the right. That seam is what lets each half scale, deploy, and fail on its own.</figcaption>
+        </figure>
         <p>The first service is the <strong>intake stage</strong>. It takes a raw incoming event, has an agent normalize and enrich it, then has a second agent query a data store to decide which entities the event actually affects. For each match, it writes one small work item into a blob container. That's its whole job: turn one vague event into a pile of concrete, independent units of work. It's a short, fixed pipeline, so we'll build it as a simple linear graph.</p>
         <p>The second service is the <strong>processing stage</strong>. It watches that blob container, and every time a new work item shows up, it spins up an independent run to handle it. Each run is a small team of agents (a researcher, a writer, a reviewer) talking in a shared conversation until the reviewer signs off. When they're done, the result gets persisted and the world gets notified. Because each work item gets its own run, the processing stage is doing many of these at once.</p>
-        <p>The reason these are two separate services and not two functions in one process is the thing we keep coming back to: they're different animals. Intake is quick and runs once per event. Processing is slow, token-hungry, and runs once per affected entity. Splitting them at the storage seam means you can run one intake instance and ten processing instances, or restart processing without touching intake, or replace the storage poll with a real event subscription later, all without renegotiating anything between the two. We'll spend Chapter 8 entirely on that seam because it earns the attention.</p>
+        <p>The reason these are two separate services and not two functions in one process is the thing we keep coming back to: they're different animals. Intake is quick and runs once per event. Processing is slow, token-hungry, and runs once per affected entity. Both scale out, just on different triggers: a fresh intake instance is spawned for each incoming event, while the processing side runs as many instances as the backlog of work items demands. Splitting them at the storage seam is what makes that possible &mdash; you can scale the two halves independently, restart processing without touching intake, or replace the storage poll with a real event subscription later, all without renegotiating anything between the two. We'll spend Chapter 8 entirely on that seam because it earns the attention.</p>
+      </div>
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>Intake Stage</h3>
+          <dl class="trait-list">
+            <div><dt>Speed</dt><dd>Quick</dd></div>
+            <div><dt>Cost</dt><dd>Cheap</dd></div>
+            <div><dt>Runs</dt><dd>Once per event</dd></div>
+            <div><dt>Shape</dt><dd>Fixed linear graph</dd></div>
+            <div><dt>Scale</dt><dd>New instance per event</dd></div>
+          </dl>
+        </div>
+        <div class="info-card">
+          <h3>Processing Stage</h3>
+          <dl class="trait-list">
+            <div><dt>Speed</dt><dd>Slow</dd></div>
+            <div><dt>Cost</dt><dd>Token-hungry</dd></div>
+            <div><dt>Runs</dt><dd>Once per affected entity</dd></div>
+            <div><dt>Shape</dt><dd>Group-chat agent team</dd></div>
+            <div><dt>Scale</dt><dd>Many instances</dd></div>
+          </dl>
+        </div>
       </div>
     </section>
     <hr class="section-divider">
 
+    <div class="dot-fade dot-fade--trailing">
     <section class="chapter-section">
       <header class="section-heading">
         <span class="eyebrow">The Map</span>
@@ -145,17 +216,18 @@
         <p>One note before we start: from the next chapter on, the application's own names get generalized so the pattern stays portable. The Microsoft pieces it integrates with, Agent 365, Purview, Azure AI Foundry, the Agent Framework, MCP, Aspire, do not get generalized, because those integrations are a real part of the pattern and pretending otherwise would just make the guide vaguer and less useful. With that settled, let's look at the codebase this all comes from.</p>
       </div>
     </section>
-  </main>
 
-  <nav class="chapter-nav" aria-label="Chapter navigation">
-    <a class="chapter-nav__link chapter-nav__next" href="02-sourced-repository.html">
-      <span class="chapter-nav__dir">Next →</span>
-      <span class="chapter-nav__label">
-        <span class="chapter-nav__num">Chapter 2</span>
-        <span class="chapter-nav__title">Sourced Repository</span>
-      </span>
-    </a>
-  </nav>
+    <nav class="chapter-nav" aria-label="Chapter navigation">
+      <a class="chapter-nav__link chapter-nav__next" href="02-sourced-repository.html">
+        <span class="chapter-nav__dir">Next →</span>
+        <span class="chapter-nav__label">
+          <span class="chapter-nav__num">Chapter 2</span>
+          <span class="chapter-nav__title">Sourced Repository</span>
+        </span>
+      </a>
+    </nav>
+    </div>
+  </main>
 
   <footer class="site-footer">
     <p class="site-footer__colophon">Level 3 Agentic System Guide · A pattern tutorial derived from a real autonomous multi-agent system.</p>

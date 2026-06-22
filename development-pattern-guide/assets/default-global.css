@@ -1097,7 +1097,23 @@ body.modal-open { overflow: hidden; }
 /* === 14. Table of Contents landing page ============================ */
 .toc-hero {
   padding: var(--space-8) 0 var(--space-7);
+  position: relative;
+}
+/* Full-width hairlines above and below the hero, bleeding to the page edges like
+   the dot-fade background and section dividers (a container-width border won't).
+   One pseudo spans the hero box and carries both rules; ::before is reserved for
+   the dot-fade background. */
+.toc-hero::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 100vw;
+  margin-left: -50vw;
+  border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
+  pointer-events: none;
 }
 .toc-hero h1 {
   font-family: var(--font-display);

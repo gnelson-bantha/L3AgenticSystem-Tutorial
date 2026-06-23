@@ -68,15 +68,15 @@
       <p class="chapter-subhead">Giving agents the tools they need over the Model Context Protocol instead of hard-wiring functions into them.</p>
     </header>
 
-    <section class="chapter-section">
+    <section class="chapter-section dot-fade">
       <header class="section-heading">
         <span class="eyebrow">The Boundary</span>
         <h2>Why Tools Live in Another Process</h2>
         <p class="section-subhead">The selector agent just called some query tools; here's why those tools deliberately live across a wire.</p>
       </header>
       <div class="prose">
-        <p>In the last chapter the selector agent asked which targets an event affects, and it answered by calling tools. The obvious way to give an agent a tool is to hand it a C# delegate: write a method, register it as a function, done. That works, and for a quick prototype it's fine. This system does something deliberately heavier: it puts the tools in a separate server and has the agents reach them over the Model Context Protocol. The extra ceremony buys a boundary, and the boundary is the point.</p>
-        <p>MCP is a standard protocol for exposing tools to agents. One side is a server that publishes a catalog of tools; the other side is a client (an agent) that discovers and calls them, without knowing or caring where they run or how they're implemented. Because that contract is a protocol rather than a method signature, the tools can live in another process, be written by another team, be swapped for a real data backend, or be reused by something that isn't even an agent. None of those changes touch the agents. That is the freedom you're buying.</p>
+        <p>In the last chapter we discussed how the selector agent calls tools to query target data. The obvious way to give an agent a tool is to hand it a C# delegate, which you write as a method then register as a function. That works, and for a quick prototype it's fine. However, this system puts the tools in a separate server and has the agents reach them over the Model Context Protocol to demonstrate the value of a protocol-based approach, even if the implementation appears simple on the surface.</p>
+        <p>MCP is a standard protocol for exposing tools to agents. One side is a server that publishes a catalog of tools. The other side is a client (an agent) that discovers and calls them, without knowing or caring where they run or how they're implemented. Because that contract is a protocol rather than a method signature, the tools can live in another process, be written by another team, be swapped for a real data backend, or be reused by something that isn't even an agent. None of those changes touch the agents, which makes maintenance a lot easier!</p>
       </div>
       <div class="card-grid">
         <div class="info-card">
@@ -102,7 +102,7 @@
         <p class="section-subhead">It's an ordinary ASP.NET host that publishes a few annotated methods as tools.</p>
       </header>
       <div class="prose">
-        <p>The tool server is its own small project. It uses the MCP server package for ASP.NET, picks the Streamable HTTP transport (a long-lived HTTP connection agents can stream over), and registers a class whose methods are the tools. There's almost no ceremony: annotate the host, annotate the methods, map the endpoint.</p>
+        <p>The tool server is its own small project. It uses the MCP server package for ASP.NET, picks the Streamable HTTP transport (a long-lived HTTP connection agents can stream over), and registers a class whose methods are the tools. Implementation is simple: annotate the host, annotate the methods, map the endpoint, profit!</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">var builder = WebApplication.CreateBuilder(args);
 
@@ -115,7 +115,7 @@ var app = builder.Build();
 app.MapMcp();                     // publish the MCP endpoint
 app.Run();</code></pre>
       <div class="prose">
-        <p>The tools themselves are just methods with a couple of attributes. Each one gets a description, and that description is not decoration: it's what the model reads to decide when to call the tool, so it's written for the model's benefit. The sample exposes a small family of target queries (all targets, by region, by size, by category, and a combined region-and-size query), each backed by the entity store.</p>
+        <p>The tools themselves are just methods with a couple of attributes. Each one gets a description that is read by the model to decide when to call the tool, so it's written for the model's benefit. The sample exposes a small family of target queries (all targets, by region, by size, by category, and a combined region-and-size query), each backed by the entity store.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">[McpServerToolType]
 public sealed class TargetQueryTools(EntityStore store)
@@ -133,19 +133,19 @@ public sealed class TargetQueryTools(EntityStore store)
         =&gt; store.GetByMinSizeAsync(minSize);
 }</code></pre>
       <div class="prose">
-        <p>That's the whole server. Notice what's not here: nothing about agents, nothing about the workflow, no awareness of who's calling. The server's only concern is "here are some tools and what they do." Keeping it that ignorant is what lets it be reused so freely.</p>
+        <p>That's the whole server - no agents, no workflows, and no awareness of who's calling what. The server's only concern is "here are some tools and what they do." Keeping it that ignorant is what lets it be reused so freely.</p>
       </div>
     </section>
     <hr class="section-divider">
 
-    <section class="chapter-section">
+    <section class="chapter-section binary-fade">
       <header class="section-heading">
         <span class="eyebrow">The Client Side</span>
         <h2>Handing Tools to an Agent</h2>
         <p class="section-subhead">On the agent side, a discovered MCP tool is just another function the model can call.</p>
       </header>
       <div class="prose">
-        <p>An agent connects to the server, asks what tools it offers, and binds them. The connection is wrapped in a small resilient helper so that if the link drops (servers restart, networks blip) it reconnects rather than failing the run. That resilience matters because these are long-lived, autonomous runs; you don't want a transient hiccup to sink an hour of work.</p>
+        <p>An agent connects to the server, asks what tools it offers, and binds them. The connection is wrapped in a small resilient helper so that if the link drops (servers restart, networks blip) it reconnects rather than failing the run. That resilience matters because these are long-lived, autonomous runs. You don't want a transient hiccup to sink an hour of work.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">// A reconnecting wrapper over the MCP connection, so a dropped link self-heals
 // instead of killing a long-running autonomous run.
@@ -154,7 +154,7 @@ await connection.ConnectAsync();
 
 IList&lt;McpClientTool&gt; tools = await connection.ListToolsAsync();</code></pre>
       <div class="prose">
-        <p>The elegant part is the last step. A discovered tool comes back as an <code>McpClientTool</code>, which derives from the framework's <code>AIFunction</code> type. That means a remote tool, living in another process and reached over a protocol, drops into an agent in exactly the same place a local C# function would. The agent can't tell the difference, and doesn't need to.</p>
+        <p>The most sophisticated part is the last step. A discovered tool comes back as an <code>McpClientTool</code>, which derives from the framework's <code>AIFunction</code> type. That means a remote tool, living in another process and reached over a protocol, drops into an agent in exactly the same place a local C# function would. The agent can't tell the difference, and doesn't need to.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">// McpClientTool : AIFunction, so remote tools bind exactly like local ones.
 var selector = new ChatClientAgent(client, new ChatClientAgentOptions
@@ -173,7 +173,7 @@ var selector = new ChatClientAgent(client, new ChatClientAgentOptions
         <p class="section-subhead">The server publishes more than the agents should see, so the agents get a filtered view.</p>
       </header>
       <div class="prose">
-        <p>Here's where the boundary earns its keep a second time. The same tool server also publishes a few workflow-control tools (submit an event, get a run's status, list runs) because the external conversational front door needs them to drive the system from the outside. But the internal agents must never call those. A research agent that could submit new events or poke at workflow status is a research agent that can wander off the rails, or worse, drive the system in a loop.</p>
+        <p>The same tool server also publishes a few workflow-control tools (submit an event, get a run's status, list runs), because the external conversational front door needs them to drive the system from the outside. The internal agents must <em>never</em> call those. A research agent that could submit new events or poke at workflow status is a research agent that can wander off the rails, or worse, drive the system in a loop.</p>
         <p>The fix is a filter applied on the client side, before the tools are bound to an internal agent. The agent simply never receives the control tools, so it can't call what it can't see.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">// The control tools belong to the external front door, not the internal agents.
@@ -188,13 +188,13 @@ var research = new ChatClientAgent(client, new ChatClientAgentOptions
     Instructions = researchInstructions,
     ChatOptions = new ChatOptions { Tools = [.. dataTools] }
 });</code></pre>
-      <div class="important-banner">
+      <div class="callout">
         <span class="callout-label">Least privilege for agents</span>
         <p>An autonomous agent will use any tool you give it, which means the tools you give it <em>are</em> its permissions. Publishing a broad catalog at the server and then handing each agent only the slice it needs is least privilege applied to agents. The protocol boundary is what makes that slicing possible, because filtering happens at the seam rather than being tangled into agent logic.</p>
       </div>
       <div class="prose">
         <p>One more thing this boundary enables, worth a sentence before we move on: because tools are just an MCP catalog, you can point an agent at additional servers. The sample can optionally attach a separate analytics data agent exposed over its own MCP endpoint, and the binding code looks identical. We'll revisit that in the extending chapter.</p>
-        <p>The selector and research agents now have their data. The work items the selector produced are sitting in the storage bridge, untouched. That bridge is the structural heart of the whole system, and it's finally time to give it the chapter it deserves.</p>
+        <p>The selector and research agents now have their data. The work items the selector produced are sitting in the storage bridge, untouched. That bridge is the structural heart of the whole system.</p>
       </div>
     </section>
   </main>

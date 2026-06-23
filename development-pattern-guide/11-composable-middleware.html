@@ -68,15 +68,15 @@
       <p class="chapter-subhead">Stacking retry, Agent 365 identity telemetry, Microsoft Purview governance, OpenTelemetry, and compaction as layers around each agent's model client.</p>
     </header>
 
-    <section class="chapter-section">
+    <section class="chapter-section dot-fade">
       <header class="section-heading">
         <span class="eyebrow">The Idea</span>
         <h2>One Bridge, Many Concerns</h2>
-        <p class="section-subhead">Every cross-cutting worry hangs off a single interface, and that's what keeps the agents clean.</p>
+        <p class="section-subhead">How to offer support for services and features without cluttering the agents and keeping maintenance simple.</p>
       </header>
       <div class="prose">
-        <p>The agents you've watched do their work have stayed remarkably free of clutter. The researcher researches, the generator writes, the reviewer reviews. None of them contain a line about retrying a throttled call, emitting a trace, checking a governance policy, or trimming their own history. That's not an accident, and it's not because those concerns were skipped. They're all present; they just live somewhere else.</p>
-        <p>The trick rests on one bridge: <code>IChatClient</code>, the interface every agent uses to talk to the model. Because every model call flows through that one interface, you can wrap it. A wrapper implements <code>IChatClient</code> too, holds a reference to an inner <code>IChatClient</code>, does its bit (before, after, or around the call), and delegates the rest inward. Stack several of those wrappers and you've built a middleware pipeline for model calls, exactly like the request pipeline in a web framework, but for the agent's connection to the model.</p>
+        <p>The agents you've watched do their work have stayed remarkably free of clutter. The researcher researches, the generator writes, the reviewer reviews. None of them contain a line about retrying a throttled call, emitting a trace, checking a governance policy, or trimming their own history. That's not an accident, and it's not because those concerns were skipped. They're all present - they just live somewhere else.</p>
+        <p>The "trick" is to use a single interface and extend its functionality with middleware. <code>IChatClient</code> is the interface every agent uses to talk to the model. Because every model call flows through that one interface, you can wrap it. A wrapper implements <code>IChatClient</code> too, holds a reference to an inner <code>IChatClient</code>, does its bit (before, after, or around the call), and delegates the rest inward. Stack several of those wrappers and you've built a middleware pipeline for model calls, exactly like the request pipeline in a web framework, but for the agent's connection to the model.</p>
       </div>
       <div class="pull-quote">
         <p>If every call goes through one interface, that interface is the place to add everything the call should also do.</p>
@@ -113,7 +113,7 @@ IChatClient client = baseChatClient
     return new PurviewChatClient(inner, options);
 }</code></pre>
       <div class="prose">
-        <p>The wrappers themselves derive from <code>DelegatingChatClient</code>, which forwards every call to the inner client by default, so each wrapper only overrides the one method it cares about and lets everything else pass through. The retry layer is the clearest example: it does its whole job by catching one kind of failure and trying again.</p>
+        <p>The wrappers themselves derive from <code>DelegatingChatClient</code>, which forwards every call to the inner client by default, so each wrapper only overrides the one method it cares about and lets everything else pass through. The retry layer is the clearest example of how it catches one kind of failure and tries again.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">internal sealed class RateLimitRetryingChatClient(IChatClient inner)
     : DelegatingChatClient(inner)

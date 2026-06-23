@@ -382,6 +382,85 @@
       <div class="prose">
         <p>Here's the life of one event in a paragraph. A trigger posts it to the intake service. Intake's normalizer agent cleans it up, then its selector agent asks the tool server which targets are affected and writes one work item per match into the storage bridge. That's the end of intake's job; it never waits for processing.</p>
         <p>On the other side of the bridge, the processing service's poller notices the new work items and launches a separate run for each one, all at the same time. Inside each run, a researcher, a generator, and a reviewer take turns in a shared conversation. The reviewer holds the gate: it either approves the deliverable or sends it back to the generator, looping until it's satisfied or until a hard cap is reached. When the run finishes, the result is persisted to state and a notification goes out. Threaded through all of it, the same correlation id rides along so you can follow one event across both processes, and every agent's model calls pass through the middleware stack for retry, telemetry, governance, tracing, and compaction.</p>
+
+        <figure class="scale-diagram" id="scaling-out" aria-labelledby="scale-diagram-cap">
+          <div class="scale-diagram__head">
+            <span class="scale-diagram__eyebrow">Scaling out</span>
+            <p class="scale-diagram__lede">Each event gets its own Intake run, and each Intake fans out to one Processing run per impacted entity. Every box below executes at the same time, so the system widens with both the number of events and the number of entities each event touches.</p>
+          </div>
+
+          <div class="scale-lanes">
+            <div class="scale-lane">
+              <div class="scale-card scale-card--event">
+                <span class="scale-card__icon" aria-hidden="true">▸</span>
+                <span class="scale-card__title">Event A</span>
+                <span class="scale-card__sub">submitted to intake</span>
+              </div>
+              <span class="scale-link" aria-hidden="true"></span>
+              <div class="scale-card scale-card--intake">
+                <span class="scale-card__icon" aria-hidden="true">◆</span>
+                <span class="scale-card__title">Intake Run A</span>
+                <span class="scale-card__sub">finds 3 impacted entities</span>
+              </div>
+              <span class="scale-fan" aria-hidden="true"></span>
+              <div class="scale-runs">
+                <div class="scale-card scale-card--proc">
+                  <span class="scale-card__icon" aria-hidden="true">◇</span>
+                  <span class="scale-card__title">Entity A1</span>
+                  <span class="scale-card__sub">research · generate · review</span>
+                </div>
+                <div class="scale-card scale-card--proc">
+                  <span class="scale-card__icon" aria-hidden="true">◇</span>
+                  <span class="scale-card__title">Entity A2</span>
+                  <span class="scale-card__sub">research · generate · review</span>
+                </div>
+                <div class="scale-card scale-card--proc scale-card--stack">
+                  <span class="scale-card__count">×N</span>
+                  <span class="scale-card__icon" aria-hidden="true">◇</span>
+                  <span class="scale-card__title">Entity A3</span>
+                  <span class="scale-card__sub">research · generate · review</span>
+                </div>
+                <p class="scale-runs__note">3 Processing runs · in parallel</p>
+              </div>
+            </div>
+
+            <p class="scale-lanes__note">Both lanes run concurrently</p>
+
+            <div class="scale-lane">
+              <div class="scale-card scale-card--event">
+                <span class="scale-card__icon" aria-hidden="true">▸</span>
+                <span class="scale-card__title">Event B</span>
+                <span class="scale-card__sub">submitted to intake</span>
+              </div>
+              <span class="scale-link" aria-hidden="true"></span>
+              <div class="scale-card scale-card--intake">
+                <span class="scale-card__icon" aria-hidden="true">◆</span>
+                <span class="scale-card__title">Intake Run B</span>
+                <span class="scale-card__sub">finds 2 impacted entities</span>
+              </div>
+              <span class="scale-fan" aria-hidden="true"></span>
+              <div class="scale-runs">
+                <div class="scale-card scale-card--proc">
+                  <span class="scale-card__icon" aria-hidden="true">◇</span>
+                  <span class="scale-card__title">Entity B1</span>
+                  <span class="scale-card__sub">research · generate · review</span>
+                </div>
+                <div class="scale-card scale-card--proc scale-card--stack">
+                  <span class="scale-card__count">×N</span>
+                  <span class="scale-card__icon" aria-hidden="true">◇</span>
+                  <span class="scale-card__title">Entity B2</span>
+                  <span class="scale-card__sub">research · generate · review</span>
+                </div>
+                <p class="scale-runs__note">2 Processing runs · in parallel</p>
+              </div>
+            </div>
+          </div>
+
+          <figcaption id="scale-diagram-cap" class="scale-diagram__cap">
+            Two events trigger two parallel Intake runs; each Intake fans out to one Processing run per impacted entity — here three for Event A and two for Event B. The fan-out count <em>N</em> varies per event, so total parallelism scales with both how many events arrive and how many entities each one affects.
+          </figcaption>
+        </figure>
+
         <p>That's the entire system in one breath, which means you now have the map for everything that follows. The pattern chapters each zoom into one box. We start where the program itself starts: the composition root, where every one of these pieces gets constructed and wired together. That's next.</p>
       </div>
     </section>

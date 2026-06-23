@@ -1070,6 +1070,209 @@ pre.codeblock code.hljs { display: block; padding: 0; background: transparent; c
 }
 .arch-flow__arrow { color: var(--link); font-weight: 700; }
 
+/* === 12b. Scale-out fan diagram (Chapter 4) ====================== */
+.scale-diagram {
+  margin: var(--space-7) 0;
+  padding: var(--space-6) var(--space-6) var(--space-5);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.scale-diagram__head { margin-bottom: var(--space-5); }
+.scale-diagram__eyebrow {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--link);
+}
+.scale-diagram__lede {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--ink);
+}
+.scale-lanes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.scale-lanes__note {
+  align-self: center;
+  margin: calc(-1 * var(--space-3)) 0;
+  padding: 2px var(--space-3);
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--card);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--link);
+}
+.scale-lane {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+}
+.scale-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 0 0 auto;
+  width: 168px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.scale-card__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--link);
+  font-size: var(--text-sm);
+}
+.scale-card__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--header-ink);
+}
+.scale-card__sub {
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+  color: var(--ink-muted);
+}
+.scale-card--intake { border-color: var(--link); }
+.scale-card__count {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--accent);
+  color: var(--surface);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+}
+/* event -> intake connector */
+.scale-link {
+  position: relative;
+  flex: 0 0 auto;
+  align-self: center;
+  width: 32px;
+  height: 2px;
+}
+.scale-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 7px;
+  top: 0;
+  height: 2px;
+  background: var(--link);
+}
+.scale-link::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-left-color: var(--link);
+}
+/* intake -> N processing feed line */
+.scale-fan {
+  position: relative;
+  flex: 0 0 auto;
+  align-self: center;
+  width: 30px;
+  height: 2px;
+}
+.scale-fan::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: calc(-1 * var(--space-2));
+  top: 0;
+  height: 2px;
+  background: var(--accent);
+}
+/* the fanned-out processing runs */
+.scale-runs {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 0 0 auto;
+  padding-left: 26px;
+}
+.scale-runs::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  background: var(--accent);
+}
+.scale-runs__note {
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.scale-card--proc::before {
+  content: '';
+  position: absolute;
+  left: -26px;
+  top: 50%;
+  width: 26px;
+  height: 2px;
+  background: var(--accent);
+  transform: translateY(-1px);
+}
+.scale-card--proc::after {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-left-color: var(--accent);
+}
+.scale-card--stack {
+  box-shadow:
+    5px 5px 0 -1px var(--panel),
+    5px 5px 0 0 var(--border),
+    var(--shadow-sm);
+}
+.scale-diagram__cap {
+  margin-top: var(--space-6);
+  font-family: var(--font-subheader);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--ink-subtle);
+}
+
 /* === 13. Modal dialog ============================================== */
 .modal[hidden] { display: none; }
 .modal {
@@ -1303,6 +1506,28 @@ body.modal-open { overflow: hidden; }
     content: '↓';
     align-self: center;
     margin: var(--space-3) 0;
+    color: var(--link);
+    font-size: var(--text-lg);
+    font-weight: 700;
+  }
+  /* Scale-out diagram collapses to a vertical stack with arrows */
+  .scale-lane { flex-direction: column; align-items: stretch; gap: 0; }
+  .scale-card { width: 100%; }
+  .scale-runs { padding-left: 0; gap: var(--space-3); }
+  .scale-runs::before,
+  .scale-card--proc::before,
+  .scale-card--proc::after { display: none; }
+  .scale-link,
+  .scale-fan { width: auto; height: auto; align-self: center; padding: var(--space-2) 0; }
+  .scale-link::after,
+  .scale-fan::after { display: none; }
+  .scale-link::before,
+  .scale-fan::before {
+    position: static;
+    left: auto; right: auto; top: auto;
+    width: auto; height: auto;
+    background: none;
+    content: '↓';
     color: var(--link);
     font-size: var(--text-lg);
     font-weight: 700;

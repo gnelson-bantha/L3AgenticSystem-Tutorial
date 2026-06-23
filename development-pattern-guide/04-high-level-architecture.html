@@ -179,8 +179,8 @@
         <p class="modal__eyebrow">Component</p>
         <h2 class="modal__title" id="arch-triggers-title">Triggers</h2>
         <div class="modal__body">
-          <p>The system doesn't care who starts it; it only cares that an event arrives. In the sample there are two front doors: an operator UI where a person submits a mock event and watches the agents work, and a conversational front door (a Microsoft 365 Copilot declarative agent) that submits events and checks status through the tool server. Either one posts the same event shape to the intake service.</p>
-          <p>Because the trigger is just "something posts an event," it's the easiest part to swap. A continuous scanner that watches a real feed and posts events would slot in here without changing anything downstream.</p>
+          <p>The system doesn't care who starts it; it only cares that an event arrives. In the sample there are two front doors: an operator UI where a person submits a mock event and watches the agents work, a RESTful API endpoint, and a conversational front door (a Microsoft 365 Copilot declarative agent for demonstration purposes) that submits events. Either one posts the same event shape to the intake service.</p>
+          <p>Because the trigger is just "something posts an event," it's the easiest part to swap. An EventGrid, Service Bus, or continuous scanner that watches a real feed and posts events would slot in here without changing anything downstream.</p>
         </div>
       </div>
     </div>
@@ -232,7 +232,7 @@
         <p class="modal__eyebrow">Component</p>
         <h2 class="modal__title" id="arch-bridge-title">Storage Bridge</h2>
         <div class="modal__body">
-          <p>A plain blob container is the entire contract between the two stages. Intake writes a work-item blob; processing polls the container and picks each one up. Neither service holds a reference to the other, which is what lets them scale, deploy, and recover independently.</p>
+          <p>A plain blob container is the entire contract between the two stages. Intake writes a work-item blob; processing polls the container and picks each one up. Neither service holds a reference to the other, which is what lets them scale, deploy, and recover independently. Like the Trigger, the Bridge can be replaced with another service that provides the same functionality (e.g. a database or a message queue).</p>
           <p>This unglamorous box is doing the most important structural job in the system, so it gets a whole chapter of its own. See Chapter 8.</p>
         </div>
       </div>
@@ -245,7 +245,7 @@
         <p class="modal__eyebrow">System</p>
         <h2 class="modal__title" id="arch-processing-title">Processing Service</h2>
         <div class="modal__body">
-          <p>The second stage is where the expensive work happens. A poller watches the bridge and launches one run per work item. Each run is a collaboration runner that opens a Group Chat among three agents: a researcher gathers material, a generator writes the deliverable, and a reviewer either approves it or sends it back. The edge from reviewer back to generator is the self-correcting loop.</p>
+          <p>The second stage is where the bulk of the work happens. A poller watches the bridge and launches one run per work item. Each run is a collaboration runner that opens a Group Chat among three agents: a researcher gathers material, a generator writes the deliverable, and a reviewer either approves it or sends it back. The edge from reviewer back to generator is the self-correcting loop. Group Chat is one type of agentic workflow supported in the Microsoft Agent Framework SDK. Magentic workflows are another. The setup is a little different, but it is possible to change orchestration types to fit your use case.</p>
           <div class="arch-graph arch-graph--nested" id="arch-processing-graph">
             <div class="arch-layer">
               <button class="arch-node" type="button" id="node-pr-poller">
@@ -299,7 +299,7 @@
         <h2 class="modal__title" id="arch-tools-title">Tool Server</h2>
         <div class="modal__body">
           <p>Agents don't reach data directly. A standalone server exposes tools over the Model Context Protocol, and the agents call those tools without knowing where they run. The server offers data-query tools (look up targets by region, by size, by category) and a handful of workflow-control tools used by the conversational front door. A tool filter hides the control tools from the internal agents so they can't accidentally drive the workflow.</p>
-          <p>Because tools live behind a protocol boundary, you can add, change, or relocate them without touching agent code. Chapter 7 is all about this seam.</p>
+          <p>Because tools live behind a protocol boundary, you can add, change, or relocate them without touching agent code. This is largely present in the source repository and pattern to show how to leverage MCP servers with agentic workflows.Chapter 7 is all about this seam.</p>
         </div>
       </div>
     </div>

@@ -1473,7 +1473,17 @@ body.modal-open { overflow: hidden; }
 /* === 14. Table of Contents landing page ============================ */
 .toc-hero {
   padding: var(--space-8) 0 var(--space-7);
-  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+/* Full-width navy hairline under the hero, matching the chapter-header rule. */
+.toc-hero::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 100vw;
+  margin-left: -50vw;
+  border-top: 1px solid var(--rule);
 }
 .toc-hero h1 {
   font-family: var(--font-display);

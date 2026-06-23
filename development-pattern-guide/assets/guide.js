@@ -236,13 +236,28 @@
   function anchorPoint(rect, gr, side) {
     var cx = rect.left - gr.left + rect.width / 2;
     var cy = rect.top - gr.top + rect.height / 2;
-    switch (side) {
-      case "top": return { x: cx, y: rect.top - gr.top, nx: 0, ny: -1 };
-      case "bottom": return { x: cx, y: rect.bottom - gr.top, nx: 0, ny: 1 };
-      case "left": return { x: rect.left - gr.left, y: cy, nx: -1, ny: 0 };
-      case "right": return { x: rect.right - gr.left, y: cy, nx: 1, ny: 0 };
-      default: return { x: cx, y: cy, nx: 0, ny: 0 };
+    /* Vertical sides (left/right) accept an "-upper"/"-lower" suffix to bias the
+       attach point into the top or bottom quarter of that edge; horizontal sides
+       (top/bottom) accept "-left"/"-right". Plain names stay centred. */
+    var top = rect.top - gr.top;
+    var height = rect.height;
+    var left = rect.left - gr.left;
+    var width = rect.width;
+    function vy(s) {
+      if (s.indexOf("-upper") !== -1) return top + height * 0.25;
+      if (s.indexOf("-lower") !== -1) return top + height * 0.75;
+      return cy;
     }
+    function hx(s) {
+      if (s.indexOf("-left") !== -1) return left + width * 0.25;
+      if (s.indexOf("-right") !== -1) return left + width * 0.75;
+      return cx;
+    }
+    if (side.indexOf("left") === 0) return { x: left, y: vy(side), nx: -1, ny: 0 };
+    if (side.indexOf("right") === 0) return { x: rect.right - gr.left, y: vy(side), nx: 1, ny: 0 };
+    if (side.indexOf("top") === 0) return { x: hx(side), y: top, nx: 0, ny: -1 };
+    if (side.indexOf("bottom") === 0) return { x: hx(side), y: rect.bottom - gr.top, nx: 0, ny: 1 };
+    return { x: cx, y: cy, nx: 0, ny: 0 };
   }
 
   function drawGraph(graph) {
@@ -328,7 +343,11 @@
           var sp = anchorPoint(fr, gr, fromAnchor);
           var tp = anchorPoint(tr, gr, toAnchor);
           sx = sp.x; sy = sp.y; tx = tp.x; ty = tp.y;
-          var aBow = Math.max(40, Math.sqrt((tx - sx) * (tx - sx) + (ty - sy) * (ty - sy)) * 0.3);
+          /* Optional explicit bow (px) lets the author pull a curve tighter so it
+             clears a neighbouring node instead of bowing the full default amount. */
+          var aBowAttr = parseFloat(li.getAttribute("data-bow"));
+          var aBow = !isNaN(aBowAttr) ? aBowAttr
+            : Math.max(40, Math.sqrt((tx - sx) * (tx - sx) + (ty - sy) * (ty - sy)) * 0.3);
           c1x = sx + sp.nx * aBow; c1y = sy + sp.ny * aBow;
           c2x = tx + tp.nx * aBow; c2y = ty + tp.ny * aBow;
           maxLabelWidth = 104;
@@ -386,6 +405,8 @@
                clear of the line it would otherwise sit on top of. */
             var labelDy = parseFloat(li.getAttribute("data-label-dy"));
             if (!isNaN(labelDy)) ly += labelDy;
+            var labelDx = parseFloat(li.getAttribute("data-label-dx"));
+            if (!isNaN(labelDx)) lx += labelDx;
             /* Keep the label no wider than the gap computed for this edge's
                orientation so it never spills over a node or another edge's
                text. Wrap the words onto as many lines as needed to fit. */

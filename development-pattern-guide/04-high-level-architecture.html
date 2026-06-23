@@ -150,13 +150,13 @@
         </div>
 
         <ul class="arch-edges" hidden>
-          <li data-from="node-triggers" data-to="node-intake" data-label="submits event"></li>
+          <li data-from="node-triggers" data-to="node-intake" data-label="submits event" data-label-dy="18"></li>
           <li data-from="node-intake" data-to="node-tools" data-label="queries via MCP" data-aggregate></li>
-          <li data-from="node-intake" data-to="node-bridge" data-label="writes work items" data-label-dy="18"></li>
-          <li data-from="node-bridge" data-to="node-processing" data-label="feeds parallel runs"></li>
-          <li data-from="node-processing" data-to="node-tools" data-label="queries via MCP" data-aggregate></li>
+          <li data-from="node-intake" data-to="node-bridge" data-label="writes work items" data-label-dy="30"></li>
+          <li data-from="node-bridge" data-to="node-processing" data-label="feeds parallel runs" data-label-dy="30"></li>
+          <li data-from="node-processing" data-to="node-tools" data-label="queries via MCP" data-aggregate data-from-anchor="top" data-to-anchor="right"></li>
           <li data-from="node-intake" data-to="node-middleware" data-label="wraps client" data-aggregate></li>
-          <li data-from="node-processing" data-to="node-middleware" data-label="wraps client" data-aggregate></li>
+          <li data-from="node-processing" data-to="node-middleware" data-label="wraps client" data-aggregate data-from-anchor="bottom" data-to-anchor="right"></li>
           <li data-from="node-processing" data-to="node-state" data-label="persists &amp; notifies" data-aggregate></li>
         </ul>
       </div>

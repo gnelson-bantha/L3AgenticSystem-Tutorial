@@ -233,6 +233,18 @@
     return lines.length ? lines : [String(label)];
   }
 
+  function anchorPoint(rect, gr, side) {
+    var cx = rect.left - gr.left + rect.width / 2;
+    var cy = rect.top - gr.top + rect.height / 2;
+    switch (side) {
+      case "top": return { x: cx, y: rect.top - gr.top, nx: 0, ny: -1 };
+      case "bottom": return { x: cx, y: rect.bottom - gr.top, nx: 0, ny: 1 };
+      case "left": return { x: rect.left - gr.left, y: cy, nx: -1, ny: 0 };
+      case "right": return { x: rect.right - gr.left, y: cy, nx: 1, ny: 0 };
+      default: return { x: cx, y: cy, nx: 0, ny: 0 };
+    }
+  }
+
   function drawGraph(graph) {
     try {
       var gr = graph.getBoundingClientRect();
@@ -307,7 +319,20 @@
 
         var sx, sy, tx, ty, c1x, c1y, c2x, c2y;
         var maxLabelWidth;
-        if (vertical) {
+        var fromAnchor = li.getAttribute("data-from-anchor");
+        var toAnchor = li.getAttribute("data-to-anchor");
+        if (fromAnchor && toAnchor) {
+          /* Explicit per-edge anchors: leave/enter each node perpendicular to the
+             chosen side so the author can route an edge by hand when the automatic
+             orientation twists it under a card. */
+          var sp = anchorPoint(fr, gr, fromAnchor);
+          var tp = anchorPoint(tr, gr, toAnchor);
+          sx = sp.x; sy = sp.y; tx = tp.x; ty = tp.y;
+          var aBow = Math.max(40, Math.sqrt((tx - sx) * (tx - sx) + (ty - sy) * (ty - sy)) * 0.3);
+          c1x = sx + sp.nx * aBow; c1y = sy + sp.ny * aBow;
+          c2x = tx + tp.nx * aBow; c2y = ty + tp.ny * aBow;
+          maxLabelWidth = 104;
+        } else if (vertical) {
           /* Forward (downward) edges hug the right side; feedback (upward) edges
              hug the left side. Both endpoints share a side, and the control
              points bow outward so the line never crosses under a node. */
@@ -357,6 +382,10 @@
             var u = 0.5, m = 1 - u;
             var lx = m*m*m*sx + 3*m*m*u*c1x + 3*m*u*u*c2x + u*u*u*tx;
             var ly = m*m*m*sy + 3*m*m*u*c1y + 3*m*u*u*c2y + u*u*u*ty;
+            /* Optional manual vertical nudge so a short edge's label can be moved
+               clear of the line it would otherwise sit on top of. */
+            var labelDy = parseFloat(li.getAttribute("data-label-dy"));
+            if (!isNaN(labelDy)) ly += labelDy;
             /* Keep the label no wider than the gap computed for this edge's
                orientation so it never spills over a node or another edge's
                text. Wrap the words onto as many lines as needed to fit. */

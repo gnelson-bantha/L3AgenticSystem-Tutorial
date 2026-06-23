@@ -114,6 +114,7 @@
     // It's an ordinary round-robin here, customized to stop on approval (Chapter 10).
     var manager = new ApprovalGroupChatManager(maxIterations: 3);
 
+    // Order of execution is based on the order in which they are added to the workflow: Researcher -> Generator -> Reviewer
     var workflow = AgentWorkflowBuilder
         .CreateGroupChatBuilderWith(manager)
         .AddParticipants(research, generator, reviewer)

@@ -139,7 +139,7 @@ IChatClient client = baseChatClient
     </section>
     <hr class="section-divider">
 
-    <section class="chapter-section">
+    <section class="chapter-section binary-fade">
       <header class="section-heading">
         <span class="eyebrow">The Layers</span>
         <h2>What Each Layer Actually Does</h2>
@@ -167,7 +167,7 @@ IChatClient client = baseChatClient
         </div>
         <div class="info-card">
           <h3>WithCompaction</h3>
-          <p>Hooks in the Agent Framework's <code>CompactionProvider</code> to keep the conversation within the model's context window over a long, multi-turn run. It's the outermost layer, and it's involved enough to get its own chapter next.</p>
+          <p>Hooks in the Microsoft Agent Framework SDK's <code>CompactionProvider</code> to keep the conversation within the model's context window over a long, multi-turn run. It's the outermost layer.</p>
         </div>
         <div class="info-card">
           <h3>One more job for baggage</h3>
@@ -195,15 +195,15 @@ var baggage = new BaggageBuilder()
         <p class="section-subhead">Because each layer disappears when unconfigured, one agent runs bare on your laptop and fully governed in production.</p>
       </header>
       <div class="prose">
-        <p>Remember that second branch in each extension method, the one that returns the inner client untouched when the concern isn't configured? That single decision is what makes the whole stack practical. Every layer is independently optional and degrades to a clean no-op. On your laptop with nothing configured, the chain collapses to the bare client and the agents run with no Purview, no Agent 365, no exporters. In production, the same chain lights up every layer. The agent code never changes; only the environment does. This is the optionality the prerequisites chapter promised, finally cashed out.</p>
-        <p>It also explains how the optional hosted-agent path fits in without disturbing anything. The research agent can be configured to run as a hosted Azure AI Foundry prompt agent instead of calling Azure OpenAI directly, constructed by turning a project client into an agent with <code>AIProjectClient.AsAIAgent(new AgentReference(...))</code>. Its instructions live server-side, but its model calls still flow through an <code>IChatClient</code>, so the exact same middleware chain wraps it. The Foundry agent gets the same retry, the same Agent 365 baggage, the same governance and tracing, with no special-casing. The bridge is what makes the swap free.</p>
+        <p>Remember that second branch in each extension method, the one that returns the inner client untouched when the concern isn't configured? That single decision is what makes the whole stack practical. Every layer is independently optional and degrades to a clean no-op. On your local developer environment with nothing configured, the chain collapses to the bare client and the agents run with no Purview, no Agent 365, no exporters. In production, the same chain lights up every layer. The agent code never changes; only the environment does.</p>
+        <p>It also explains how the optional hosted-agent path fits in without disturbing anything. For demonstration purposes, the research agent can be configured to run as a hosted Azure AI Foundry prompt agent instead of calling Azure OpenAI directly, constructed by turning a project client into an agent with <code>AIProjectClient.AsAIAgent(new AgentReference(...))</code>. Its instructions live server-side, but its model calls still flow through an <code>IChatClient</code>, so the exact same middleware chain wraps it. The Foundry agent gets the same retry, the same Agent 365 baggage, the same governance and tracing, with no special-casing. The Foundry agent isn't limited to the Researcher. Any of the agents could be from Foundry!</p>
       </div>
       <div class="important-banner">
         <span class="callout-label">The reusable pattern</span>
-        <p>Find the one interface every important call passes through, then express each cross-cutting concern as an optional decorator over it. Compose them in a deliberate order, and make every layer degrade to a no-op when it isn't configured. You get production concerns without touching business logic, environment differences without code differences, and new concerns added by writing one more wrapper. It costs you the discipline of routing everything through that one bridge, which is a discipline worth keeping.</p>
+        <p>Find the one interface every important call passes through, then express each cross-cutting concern as an optional decorator over it. Compose them in a deliberate order, and make every layer degrade to a no-op when it isn't configured. You get production concerns without touching business logic, environment differences without code differences, and new concerns added by writing one more wrapper.</p>
       </div>
       <div class="prose">
-        <p>We've named the outermost layer but waved at what it does. Keeping a multi-turn, self-correcting conversation inside a fixed context window is a genuine problem with a genuinely clever solution, so compaction gets the next chapter to itself.</p>
+        <p>We've named the outermost layer but waved at what it does. Keeping a multi-turn, self-correcting conversation inside a fixed context window is a genuine problem that is solved with built-in compaction.</p>
       </div>
     </section>
   </main>

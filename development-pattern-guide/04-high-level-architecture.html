@@ -75,7 +75,7 @@
         <p class="section-subhead">We've named the pieces in prose; now here they are as a picture you can actually click around in.</p>
       </header>
       <div class="prose">
-        <p>The last three chapters built up a vocabulary and a mental shape. This one turns that shape into something concrete. Below is the whole system as a left-to-right graph: work enters on the left, flows through the two stages and the storage seam between them, and finishes on the right. Arrows are labeled with the relationship, so you can read the diagram almost like a sentence.</p>
+        <p>The last three chapters built up a vocabulary and a mental shape. This one turns that shape into something concrete. Below is the whole system as a left-to-right graph: work enters on the left, flows through the two stages and the data bridge between them, and finishes on the right. Arrows are labeled with the relationship, so you can read the diagram almost like a sentence.</p>
         <p>A few of the boxes are <strong>system nodes</strong>, marked with a small "System" badge. Those are dense enough that drawing all their internals on the main map would turn it into spaghetti, so they're collapsed. Click one and it opens with its own little graph inside, showing just that subsystem's parts and how they connect. The intake service, the processing service, and the agent middleware stack are all collapsed this way. Everything else opens to a plain description. Go ahead and poke at the nodes as you read the walkthrough underneath.</p>
       </div>
     </section>
@@ -299,7 +299,7 @@
         <h2 class="modal__title" id="arch-tools-title">Tool Server</h2>
         <div class="modal__body">
           <p>Agents don't reach data directly. A standalone server exposes tools over the Model Context Protocol, and the agents call those tools without knowing where they run. The server offers data-query tools (look up targets by region, by size, by category) and a handful of workflow-control tools used by the conversational front door. A tool filter hides the control tools from the internal agents so they can't accidentally drive the workflow.</p>
-          <p>Because tools live behind a protocol boundary, you can add, change, or relocate them without touching agent code. This is largely present in the source repository and pattern to show how to leverage MCP servers with agentic workflows.Chapter 7 is all about this seam.</p>
+          <p>Because tools live behind a protocol boundary, you can add, change, or relocate them without touching agent code. This is largely present in the source repository and pattern to show how to leverage MCP servers with agentic workflows. Chapter 7 is all about this bridge.</p>
         </div>
       </div>
     </div>

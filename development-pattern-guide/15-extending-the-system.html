@@ -125,7 +125,7 @@ var hosted = projectClient
     .WithOpenTelemetry()
     .Build();</code></pre>
       <div class="prose">
-        <p>Changing how the system is triggered is the other big lever, and it lives at the front of the intake graph. The reference system is woken by an operator submitting events through a conversational front door, but nothing downstream depends on that. You could replace it with a continuous scanner that watches a feed and emits the same normalized events, and the intake workflow, the bridge, and the processing stage wouldn't notice. Similarly, the storage-bridge dispatch from Chapter 8 was deliberately built so the polling mechanism could be swapped for a managed queue (Azure Event Grid or Azure Service Bus) when you outgrow polling. In every case the seam absorbs the change: a new trigger produces the same work, a new dispatcher moves the same work, and the autonomous middle stays put.</p>
+        <p>Changing how the system is triggered is the other big lever, and it lives at the front of the intake graph. The reference system is woken by an operator submitting events through a conversational front door, but nothing downstream depends on that. You could replace it with a continuous scanner that watches a feed and emits the same normalized events, and the intake workflow, the bridge, and the processing stage wouldn't notice. Similarly, the storage-bridge dispatch from Chapter 8 was deliberately built so the polling mechanism could be swapped for a managed queue (Azure Event Grid or Azure Service Bus) when you outgrow polling. In every case the bridge absorbs the change: a new trigger produces the same work, a new dispatcher moves the same work, and the autonomous middle stays put.</p>
       </div>
       <div class="card-grid">
         <div class="info-card">
@@ -146,7 +146,7 @@ var hosted = projectClient
 
     <section class="chapter-section">
       <header class="section-heading">
-        <span class="eyebrow">The Uniform Seam</span>
+        <span class="eyebrow">The Uniform Bridge</span>
         <h2>Extending the Middleware Itself</h2>
         <p class="section-subhead">A new cross-cutting concern is one decorator and one extension method away.</p>
       </header>

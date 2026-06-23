@@ -152,7 +152,7 @@ builder.AddProject&lt;Projects.OperatorUi&gt;("operatorui")
 
 builder.Build().Run();</code></pre>
       <div class="prose">
-        <p>Read that top to bottom and you've read the system's wiring diagram. Two storage handles (one for the bridge, one for finished work), a Cosmos database for agent session persistence, the tool server, the two workflow container app projects, and the optional frontend. The <code>WaitFor(tools)</code> calls say "don't start the agents until the tools are up," and the <code>WithReference</code> calls are what give each service the connection details for the things it depends on. Notice the deliberate asymmetry: processing references intake (it posts progress back to it), but intake does not reference processing. Intake writes a work item and walks away. That one-way reference is the storage seam showing up in the wiring.</p>
+        <p>Read that top to bottom and you've read the system's wiring diagram. Two storage handles (one for the bridge, one for finished work), a Cosmos database for agent session persistence, the tool server, the two workflow container app projects, and the optional frontend. The <code>WaitFor(tools)</code> calls say "don't start the agents until the tools are up," and the <code>WithReference</code> calls are what give each service the connection details for the things it depends on. Notice the deliberate asymmetry: processing references intake (it posts progress back to it), but intake does not reference processing. Intake writes a work item and walks away. That one-way reference is the data bridge showing up in the wiring.</p>
       </div>
       <div class="callout">
         <span class="callout-label">A general lesson, not an Aspire one</span>

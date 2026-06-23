@@ -70,16 +70,16 @@
 
     <section class="chapter-section">
       <header class="section-heading">
-        <span class="eyebrow">The Seam</span>
+        <span class="eyebrow">The Bridge</span>
         <h2>The Most Important Box Is Almost Empty</h2>
-        <p class="section-subhead">It's just a container of files, and that humbleness is exactly the source of its power.</p>
+        <p class="section-subhead">It's just a container of files, and that simplicity is what makes it clever.</p>
       </header>
       <div class="prose">
-        <p>We keep coming back to the seam, and now we stand on it. The bridge between intake and processing is a blob container. That's it. Intake drops a work item into it; processing fishes work items out of it. There's no message bus to configure, no shared library, no direct call between the two services. Two stages, one folder of files, complete ignorance of each other.</p>
-        <p>It's worth being precise about what this humble container actually buys, because every benefit traces back to one property: the work item is <em>durable</em> the instant it's written. Once a work item is a blob, intake's job is genuinely over, and the work survives anything. Restart processing, deploy a new version, crash a node, and the work items are still sitting there waiting. The container is also a natural backpressure valve: if work arrives faster than processing can chew through it, items just accumulate, no one falls over, and the backlog drains when capacity frees up. And because the contract is "a work item is a blob," you can run as many processing instances as you like against the same container.</p>
+        <p>The bridge between intake and processing is a blob container. This is the simplest possible way to enable communication between the two agentic workflows. It could be swapped for a database, a service bus, or any other messaging system. Intake drops a work item into it while processing fishes work items out of it. There's no direct call between the two services. Two workflows, in separate app containers, one folder of files, completely ignorant of each other.</p>
+        <p>It's worth being precise about what this storage container actually buys, because every benefit traces back to one property: the work item is <em>durable</em> the instant it's written. Once a work item is a blob, intake's job is genuinely over, and the work persists. Restart processing, deploy a new version, crash a node, and the work items are still sitting there waiting. The container is also a natural backpressure valve. If work arrives faster than processing can chew through it, items just accumulate, no one falls over, and the backlog drains when capacity frees up. Also, because the contract is "a work item is a blob," you can run as many processing instances as you like against the same container.</p>
       </div>
       <div class="pull-quote">
-        <p>Put durable storage on the seam between your stages, and a crash stops being a catastrophe. It becomes a pause.</p>
+        <p>Put durable storage on the bridge between your stages, and a crash stops being a catastrophe. It's merely a speedbump.</p>
       </div>
     </section>
     <hr class="section-divider">
@@ -126,19 +126,19 @@
     }
 }</code></pre>
       <div class="prose">
-        <p>Two guardrails bracket the loop. The poller waits until the agent pool is ready before it polls at all, so a slow startup never causes a work item to be claimed and then dropped because the agents weren't built yet. And it recovers orphans before the first poll, which is the next section.</p>
+        <p>Two guardrails bracket the loop. The poller waits until the agent pool is ready before it polls at all, so a slow startup never causes a work item to be claimed and then dropped because the agents weren't built yet. And it recovers orphans before the first poll, which we'll cover next!</p>
       </div>
     </section>
     <hr class="section-divider">
 
-    <section class="chapter-section">
+    <section class="chapter-section binary-fade">
       <header class="section-heading">
         <span class="eyebrow">Resilience</span>
         <h2>Surviving Crashes With Orphan Recovery</h2>
-        <p class="section-subhead">Claiming an item by moving it leaves a clean trail, and that trail is what makes recovery trivial.</p>
+        <p class="section-subhead">Claiming an item by moving it avoids lost work items and duplicate processing.</p>
       </header>
       <div class="prose">
-        <p>Think about what happens if a processing instance dies mid-run. The work item it was handling has already moved into the processing container (it got claimed), but the run never finished. If nothing intervened, that item would sit in the processing container forever, claimed by a process that no longer exists. An orphan.</p>
+        <p>Think about what happens if a processing instance dies mid-run. The work item it was handling has already moved into the processing container (it got claimed), but the run never finished. If nothing intervened, that item would sit in the processing container forever, claimed by a process that no longer exists - orphaned, forever alone, forgotten.</p>
         <p>The claim-by-move pattern makes the fix almost free. Anything sitting in the processing container at startup must be an orphan, because a healthy instance would have finished it and removed it. So on startup, before polling, the poller sweeps the processing container and moves everything back to pending. Those items get picked up and run again. A crash costs you a restart, not a lost work item.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">// Anything still in the processing container at startup was claimed by an instance
@@ -173,18 +173,18 @@ public async Task RecoverOrphansAsync()
       <header class="section-heading">
         <span class="eyebrow">Honest Trade-offs</span>
         <h2>What You'd Change for Production</h2>
-        <p class="section-subhead">The seam is the real design; polling a blob container is just the cheapest thing that honors it.</p>
+        <p class="section-subhead">The data bridge is the real design; polling a blob container is just the cheapest, easiest thing that honors it.</p>
       </header>
       <div class="prose">
-        <p>It's worth being upfront: polling a container every few seconds is not how you'd run this at serious scale. It adds latency (a work item can sit for up to the poll interval before anyone notices it) and it's chattier than it needs to be. The sample uses it because it's the simplest thing that proves the architecture, and proving the architecture is the goal.</p>
-        <p>The reason this is fine is that the seam, not the polling, is the design. The contract is "work items live in durable storage, and something picks them up." Swap the blob poll for a real event subscription (a storage-event trigger, a service-bus queue, a managed event grid) and nothing on either side of the seam has to change. Intake still writes durable work items; processing still claims and runs them. You'd keep the claim-by-move and orphan-recovery ideas, because durable queues have their own version of the same concerns. The poll is an implementation detail behind a deliberately stable interface.</p>
+        <p>It's worth being upfront that polling a container every few seconds is not how you'd run this at serious scale. It adds latency (a work item can sit for up to the poll interval before anyone notices it) and it's chattier than it needs to be. The sample uses it because it's the simplest thing that proves the architecture.</p>
+        <p>The reason this is fine is that the data bridge, not the polling, is the design. The contract is "work items live in durable storage, and something picks them up." Swap the blob poll for a real event subscription (a storage-event trigger, a service bus queue, a managed event grid) and nothing on either side of the bridge has to change. Intake still writes durable work items; processing still claims and runs them. You'd keep the claim-by-move and orphan-recovery ideas, because durable queues have their own version of the same concerns. The poll is an implementation detail behind a deliberately stable interface.</p>
       </div>
       <div class="callout">
         <span class="callout-label">The portable takeaway</span>
-        <p>Design the seam as "durable work plus a pickup mechanism," then pick the cheapest pickup that fits where you are. Start with polling to get the architecture right, and graduate to a real event source without touching either stage. The decoupling is what's valuable; the transport is swappable.</p>
+        <p>Design the bridge as "durable work plus a pickup mechanism," then pick the cheapest pickup that fits where you are. Start with polling to get the architecture right, and graduate to a real event source without touching either stage. The decoupling is what's valuable; the transport is swappable.</p>
       </div>
       <div class="prose">
-        <p>We've now followed a work item from the selector's pen all the way to a running pipeline on the other side of the bridge. The obvious next question is what actually happens inside one of those runs. The answer is three agents in a shared conversation, and that's the next chapter.</p>
+        <p>We've now followed a work item from the selector's pen all the way to a running pipeline on the other side of the bridge. The obvious next question is what actually happens inside one of those runs. The answer is three agents in a shared conversation, and that's the next chapter...</p>
       </div>
     </section>
   </main>

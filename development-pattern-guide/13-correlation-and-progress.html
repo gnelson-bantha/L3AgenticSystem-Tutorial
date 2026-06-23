@@ -72,7 +72,7 @@
       <header class="section-heading">
         <span class="eyebrow">The Visibility Problem</span>
         <h2>Following One Event Through Two Processes</h2>
-        <p class="section-subhead">The storage seam that bought us decoupling also took away the easy answer to "where is this event right now?"</p>
+        <p class="section-subhead">The data bridge that bought us decoupling also took away the easy answer to "where is this event right now?"</p>
       </header>
       <div class="prose">
         <p>The decoupling we worked so hard for has a flip side. Intake and processing are separate processes that never call each other, which is wonderful for scaling and terrible for answering a simple operator question: "I submitted an event a minute ago, what's happening to it?" There's no single call stack to follow, no one process that sees the whole journey. The event fans out into work items, those scatter across parallel runs in a different service, and nobody is holding the thread.</p>

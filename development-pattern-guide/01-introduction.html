@@ -95,7 +95,7 @@
       <div class="prose">
         <p>Strip away the domain and the pattern is this: an autonomous, multi-stage agent pipeline whose stages are decoupled by durable storage, fanned out for parallelism, and kept honest by a bounded generate-and-review loop, with every cross-cutting concern bolted on as composable middleware rather than baked into the agents. That's a mouthful, so let's take it apart piece by piece, because each clause is a decision you'll be making in your own system.</p>
         <p><strong>Multi-stage.</strong> The work splits naturally into a cheap, fast intake phase (figure out what needs doing) and an expensive, slow processing phase (actually do it, well). Those two phases have completely different shapes and completely different scaling needs, so we run them as separate services instead of one monolith.</p>
-        <p><strong>Decoupled by durable storage.</strong> Between the two phases sits a plain storage container. Intake writes work into it; processing reads work out of it. Neither one calls the other directly. That seam is what lets the two halves scale, deploy, and fail independently, and it's the difference between a demo and something that survives a crash.</p>
+        <p><strong>Decoupled by durable storage.</strong> Between the two phases sits a plain storage container. Intake writes work into it; processing reads work out of it. Neither one calls the other directly. That bridge is what lets the two halves scale, deploy, and fail independently, and it's the difference between a demo and something that survives a crash.</p>
         <p><strong>Fanned out for parallelism.</strong> Intake doesn't produce one big job, it produces many small ones, one per affected entity. Each lands as its own item in storage, and the processing side picks them up and runs them at the same time. Ten affected entities means ten pipelines running in parallel, not one pipeline grinding through ten in a row.</p>
         <p><strong>Bounded generate-and-review.</strong> Inside the processing stage, the agents don't just produce output and trust it. One agent drafts, another reviews and can send it back for another pass. The loop self-corrects, which is how you get quality without a human gate. And it's <em>bounded</em>: there's a hard cap on how many times it can go around, so an agent that can never satisfy its reviewer still terminates instead of looping forever.</p>
         <p><strong>Composable middleware.</strong> Identity telemetry, content governance, distributed tracing, retry, context management: none of that lives in the agents. Each one is a thin wrapper around the agent's model client, snapped on like a Lego brick. You can run the exact same agent code bare on your laptop and fully instrumented in production, just by changing which wrappers are present.</p>
@@ -107,7 +107,7 @@
         </div>
         <div class="info-card">
           <h3>What it trades off</h3>
-          <p>A storage seam buys independent scaling and crash recovery but adds eventual consistency and a little latency. A round-robin review loop is simpler than an explicit message graph but gives up fine-grained routing. A hard cap guarantees termination but can yield an unfinished draft you have to surface honestly.</p>
+          <p>A data bridge buys independent scaling and crash recovery but adds eventual consistency and a little latency. A round-robin review loop is simpler than an explicit message graph but gives up fine-grained routing. A hard cap guarantees termination but can yield an unfinished draft you have to surface honestly.</p>
         </div>
         <div class="info-card">
           <h3>What you get</h3>
@@ -120,14 +120,14 @@
     <section class="chapter-section">
       <header class="section-heading">
         <span class="eyebrow">The Two Halves</span>
-        <h2>Two Stages and One Storage Seam</h2>
+        <h2>Two Stages and One Data Bridge</h2>
         <p class="section-subhead">Everything in the guide hangs off this one picture, so it's worth burning into memory now.</p>
       </header>
       <div class="prose">
-        <p>If you remember nothing else from this chapter, remember the seam. The system is two services that never speak to each other directly. They speak through a storage container, and that indirection is load-bearing.</p>
+        <p>If you remember nothing else from this chapter, remember the bridge. The system is two services that never speak to each other directly. They speak through a storage container, and that indirection is load-bearing.</p>
         <figure class="seam-figure">
           <svg viewBox="0 0 960 340" role="img" aria-labelledby="seam-fig-title seam-fig-desc">
-            <title id="seam-fig-title">The storage seam between the intake and processing stages</title>
+            <title id="seam-fig-title">The data bridge between the intake and processing stages</title>
             <desc id="seam-fig-desc">A new intake instance handles each incoming event and writes one work item per affected entity into a storage container. The processing stage reads each item and runs it as its own parallel job. The two services never call each other directly, and both scale out independently.</desc>
             <defs>
               <marker id="seam-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
@@ -135,9 +135,9 @@
               </marker>
             </defs>
 
-            <!-- the seam -->
+            <!-- the bridge -->
             <line class="seam-figure__seam" x1="480" y1="46" x2="480" y2="300"/>
-            <text class="seam-figure__seam-label" x="480" y="34" text-anchor="middle">THE SEAM</text>
+            <text class="seam-figure__seam-label" x="480" y="34" text-anchor="middle">THE BRIDGE</text>
 
             <!-- intake stage (stacked cards: a fresh instance per event) -->
             <rect class="seam-figure__stack" x="48" y="126" width="210" height="120" rx="16"/>
@@ -171,11 +171,11 @@
             <text class="seam-figure__edge-label" x="347" y="192" text-anchor="middle">writes work items</text>
             <text class="seam-figure__edge-label" x="610" y="166" text-anchor="middle">one run per item</text>
           </svg>
-          <figcaption>Two services that never call each other, joined only by a storage container &mdash; a fresh intake instance per incoming event on the left, a parallel processing run per work item on the right. That seam is what lets each half scale, deploy, and fail on its own.</figcaption>
+          <figcaption>Two services that never call each other, joined only by a storage container &mdash; a fresh intake instance per incoming event on the left, a parallel processing run per work item on the right. That bridge is what lets each half scale, deploy, and fail on its own.</figcaption>
         </figure>
         <p>The first service is the <strong>intake stage</strong>. It takes a raw incoming event, has an agent normalize and enrich it, then has a second agent query a data store to decide which entities the event actually affects. For each match, it writes one small work item into a blob container. That's its whole job: turn one vague event into a pile of concrete, independent units of work. It's a short, fixed pipeline, so we'll build it as a simple linear graph.</p>
         <p>The second service is the <strong>processing stage</strong>. It watches that blob container, and every time a new work item shows up, it spins up an independent run to handle it. Each run is a small team of agents (a researcher, a writer, a reviewer) talking in a shared conversation until the reviewer signs off. When they're done, the result gets persisted and the world gets notified. Because each work item gets its own run, the processing stage is doing many of these at once.</p>
-        <p>The reason these are two separate services and not two functions in one process is the thing we keep coming back to: they're different animals. Intake is quick and runs once per event. Processing is slow, token-hungry, and runs once per affected entity. Both scale out, just on different triggers: a fresh intake instance is spawned for each incoming event, while the processing side runs as many instances as the backlog of work items demands. Splitting them at the storage seam is what makes that possible &mdash; you can scale the two halves independently, restart processing without touching intake, or replace the storage poll with a real event subscription later, all without renegotiating anything between the two. We'll spend Chapter 8 entirely on that seam because it earns the attention.</p>
+        <p>The reason these are two separate services and not two functions in one process is the thing we keep coming back to: they're different animals. Intake is quick and runs once per event. Processing is slow, token-hungry, and runs once per affected entity. Both scale out, just on different triggers: a fresh intake instance is spawned for each incoming event, while the processing side runs as many instances as the backlog of work items demands. Splitting them at the data bridge is what makes that possible &mdash; you can scale the two halves independently, restart processing without touching intake, or replace the storage poll with a real event subscription later, all without renegotiating anything between the two. We'll spend Chapter 8 entirely on that bridge because it earns the attention.</p>
       </div>
       <div class="card-grid">
         <div class="info-card">
@@ -211,7 +211,7 @@
       </header>
       <div class="prose">
         <p>The guide moves roughly in build order. First the framing: the next chapter walks the real repository this pattern came from (using its real names, the one place we do that), then prerequisites, then a clickable architecture map you can poke at.</p>
-        <p>After that come the pattern chapters, which are the heart of it. We start at the composition root, where the whole thing gets wired together, then build the intake stage, then the tool boundary that feeds the agents data over the Model Context Protocol. We cross the storage seam, build the group-chat processing stage, and add the self-correcting review loop that makes the output trustworthy. From there we get into the cross-cutting machinery: the middleware stack that adds Agent 365 identity telemetry, Microsoft Purview governance, and OpenTelemetry tracing around each agent; the compaction pipeline that keeps long conversations inside the context window; and the correlation id that lets you trace one event across two processes.</p>
+        <p>After that come the pattern chapters, which are the heart of it. We start at the composition root, where the whole thing gets wired together, then build the intake stage, then the tool boundary that feeds the agents data over the Model Context Protocol. We cross the data bridge, build the group-chat processing stage, and add the self-correcting review loop that makes the output trustworthy. From there we get into the cross-cutting machinery: the middleware stack that adds Agent 365 identity telemetry, Microsoft Purview governance, and OpenTelemetry tracing around each agent; the compaction pipeline that keeps long conversations inside the context window; and the correlation id that lets you trace one event across two processes.</p>
         <p>The last stretch is about living with the system: how a human can re-open a finished deliverable and re-run the same agents, how to extend the system with new agents and tools, and how to ship the whole thing to Azure with Aspire. Then an appendix of references for every piece of the stack.</p>
         <p>One note before we start: from the next chapter on, the application's own names get generalized so the pattern stays portable. The Microsoft pieces it integrates with, Agent 365, Purview, Azure AI Foundry, the Agent Framework, MCP, Aspire, do not get generalized, because those integrations are a real part of the pattern and pretending otherwise would just make the guide vaguer and less useful. With that settled, let's look at the codebase this all comes from.</p>
       </div>

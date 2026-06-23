@@ -85,7 +85,7 @@ Determine:
   and how they interact (entry points, control flow, data/request flow).
 - **Key classes/modules/services** and their responsibilities, including the
   **contracts and invariants** they uphold (what must always be true) and the
-  **boundaries** between them (interfaces, abstractions, seams).
+  **boundaries** between them (interfaces, abstractions, bridges).
 - **Control and data flow specifics**: how a request/operation actually moves
   through the system step by step, where state lives, and how errors, edge
   cases, and failures are handled.
@@ -179,7 +179,7 @@ cover, with genuine technical depth (per §7):
   how they interact (entry points, control flow, data/request flow).
 - **Key classes/modules/services**: the important real types and their
   responsibilities, the contracts/invariants they uphold, and the boundaries
-  (interfaces, seams) between them.
+  (interfaces, bridges) between them.
 - **How it maps to the pattern**: close by pointing out which parts of this real
   structure the rest of the guide generalizes, so the reader can connect the
   concrete source to the abstracted lesson that follows.

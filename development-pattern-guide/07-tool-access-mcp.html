@@ -190,7 +190,7 @@ var research = new ChatClientAgent(client, new ChatClientAgentOptions
 });</code></pre>
       <div class="callout">
         <span class="callout-label">Least privilege for agents</span>
-        <p>An autonomous agent will use any tool you give it, which means the tools you give it <em>are</em> its permissions. Publishing a broad catalog at the server and then handing each agent only the slice it needs is least privilege applied to agents. The protocol boundary is what makes that slicing possible, because filtering happens at the seam rather than being tangled into agent logic.</p>
+        <p>An autonomous agent will use any tool you give it, which means the tools you give it <em>are</em> its permissions. Publishing a broad catalog at the server and then handing each agent only the slice it needs is least privilege applied to agents. The protocol boundary is what makes that slicing possible, because filtering happens at the bridge rather than being tangled into agent logic.</p>
       </div>
       <div class="prose">
         <p>One more thing this boundary enables, worth a sentence before we move on: because tools are just an MCP catalog, you can point an agent at additional servers. The sample can optionally attach a separate analytics data agent exposed over its own MCP endpoint, and the binding code looks identical. We'll revisit that in the extending chapter.</p>

@@ -571,6 +571,8 @@ hr.section-divider:has(+ .binary-fade) { margin-bottom: 0; }
 .binary-fade__main { min-width: 0; }
 .dot-fade__aside,
 .binary-fade__aside { align-self: start; }
+/* Bottom-aligned aside: the graphic sits at the foot of the taller prose column. */
+.binary-fade__aside.building-blocks__aside { align-self: end; }
 
 /* === 9. Prose ====================================================== */
 .prose { max-width: none; }
@@ -829,6 +831,79 @@ pre.codeblock code.hljs { display: block; padding: 0; background: transparent; c
 }
 .info-card h3 { font-size: var(--text-sm); margin-bottom: var(--space-3); }
 .info-card p { font-size: var(--text-xs); line-height: var(--leading-normal); color: var(--ink); }
+
+/* Building blocks: a Tetris-like tower the composition root stacks up, from the
+   Aspire AppHost foundation to the workflow services on top, with blank pieces
+   hovering above as if mid-drop. Built for a .binary-fade__aside; the
+   .building-blocks__aside modifier pins it to the bottom of the prose column. */
+.building-blocks {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  /* Shared block height drives both the tower rows and the drop distances. */
+  --bb-block-h: 54px;
+  --bb-step: calc(var(--bb-block-h) + var(--space-2));
+}
+.building-blocks__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.building-blocks__row {
+  display: flex;
+  gap: var(--space-2);
+}
+.building-block {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--bb-block-h);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  text-align: center;
+  color: var(--header-ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45), var(--shadow-sm);
+}
+.building-block--wide { flex-basis: 100%; }
+/* The foundation everything is stacked on reads as the solid base of the tower. */
+.building-block--foundation {
+  color: var(--accent-ink);
+  background: var(--header-ink);
+  border-color: var(--header-ink);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.18), var(--shadow-sm);
+}
+/* Two full-size pieces hovering over Intake and Processing, as if mid-drop. The
+   first sits one block above Intake, the second two blocks above Processing. */
+.building-blocks__ghosts {
+  display: flex;
+  gap: var(--space-2);
+}
+.building-block-ghost {
+  flex: 1 1 0;
+  min-height: var(--bb-block-h);
+  background: color-mix(in srgb, var(--panel) 86%, var(--ink) 14%);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28), var(--shadow-sm);
+}
+.building-block-ghost--a { transform: translateY(calc(-1 * var(--bb-step))) rotate(-25deg); }
+.building-block-ghost--b { transform: translateY(calc(-2 * var(--bb-step))) rotate(25deg); }
+.building-blocks__caption {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--link);
+  text-align: center;
+}
 
 /* Resource list: full-width cards stacked vertically (one per row) so long
    URLs have the whole content column to wrap into and never overflow. */
@@ -1493,6 +1568,8 @@ body.modal-open { overflow: hidden; }
   .chapter-section { padding: var(--space-4) 0; }
   .dot-fade { padding: var(--space-5) 0; }
   .dot-fade__grid { grid-template-columns: 1fr; gap: var(--space-5); }
+  .binary-fade__grid { grid-template-columns: 1fr; gap: var(--space-5); }
+  .binary-fade__aside.building-blocks__aside { align-self: start; }
   .container { padding: 0 var(--space-5); }
   .site-header { padding: var(--space-3) var(--space-5); }
   .chapter-nav__link { max-width: 100%; flex: 1 1 100%; }

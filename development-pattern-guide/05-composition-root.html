@@ -64,19 +64,48 @@
   <main id="main" class="container">
     <header class="chapter-header">
       <p class="chapter-eyebrow">Chapter 5</p>
-      <h1 class="chapter-title">The Composition Root</h1>
+      <h1 class="chapter-title">The Composition Root: Orchestrating the System</h1>
       <p class="chapter-subhead">Where the whole system gets constructed, wired together, and handed its dependencies before any work begins.</p>
     </header>
 
-    <section class="chapter-section">
+    <section class="chapter-section dot-fade">
       <header class="section-heading">
         <span class="eyebrow">First Principles</span>
         <h2>Where a Distributed System Begins</h2>
-        <p class="section-subhead">The architecture map showed the boxes; this chapter shows the one place where those boxes get built.</p>
+        <p class="section-subhead">The architecture map showed the components; this chapter shows the one place where those components get built.</p>
       </header>
-      <div class="prose">
-        <p>Every program has a spot where the abstract design becomes concrete objects: dependencies get constructed, handed to whatever needs them, and the application starts running. That spot has a name, the composition root, and keeping it in one place is one of the highest-leverage decisions you can make. When construction lives at the root and everything else just receives what it needs, the rest of the code stays ignorant of how things are built. That ignorance is what makes the pieces swappable, which is the entire game in a system you want to extend later.</p>
-        <p>A distributed system has this at two levels, and it's worth holding both in your head. There's the composition root for each individual service (its <code>Program.cs</code>, where that one process wires up its own dependencies), and there's a composition root for the <em>whole distributed application</em>, which describes how the services and their backing resources fit together. In this system the second one is the Aspire orchestrator, and it's the more interesting of the two, so we'll start there.</p>
+      <div class="dot-fade__grid">
+        <div class="dot-fade__main">
+          <div class="prose">
+            <p>Every program has a spot where the abstract design becomes concrete objects: dependencies get constructed, handed to whatever needs them, and the application starts running. That spot has a name, the composition root, and keeping it in one place is one of the highest-leverage decisions you can make. When construction lives at the root and everything else just receives what it needs, the rest of the code stays ignorant of how things are built. That ignorance is what makes the pieces swappable, which is the entire point in a system you want to extend later.</p>
+            <p>A distributed system has this at two levels, and it's worth learning about both. There's the composition root for each individual service (its <code>Program.cs</code>, where that one process wires up its own dependencies), and there's a composition root for the <em>whole distributed application</em>, which describes how the services and their backing resources fit together. In this system the second one is the Aspire orchestrator, and, while not necessarily required for it to work, it's very helpful and the more interesting of the two, so we'll start there.</p>
+          </div>
+        </div>
+        <aside class="dot-fade__aside building-blocks__aside" aria-label="The building blocks Aspire stacks into the system: an Aspire AppHost foundation, Key Vault, Database and Storage, then the Intake and Processing services on top">
+          <figure class="building-blocks">
+            <div class="building-blocks__stack">
+              <div class="building-blocks__ghosts" aria-hidden="true">
+                <span class="building-block-ghost building-block-ghost--a"></span>
+                <span class="building-block-ghost building-block-ghost--b"></span>
+              </div>
+              <div class="building-blocks__row">
+                <span class="building-block">Intake</span>
+                <span class="building-block">Processing</span>
+              </div>
+              <div class="building-blocks__row">
+                <span class="building-block">Database</span>
+                <span class="building-block">Storage</span>
+              </div>
+              <div class="building-blocks__row">
+                <span class="building-block building-block--wide">Key Vault</span>
+              </div>
+              <div class="building-blocks__row">
+                <span class="building-block building-block--wide building-block--foundation">Aspire AppHost</span>
+              </div>
+            </div>
+            <figcaption class="building-blocks__caption">Composed by Aspire</figcaption>
+          </figure>
+        </aside>
       </div>
     </section>
     <hr class="section-divider">
@@ -85,11 +114,11 @@
       <header class="section-heading">
         <span class="eyebrow">The Orchestrator</span>
         <h2>One File That Describes the Whole System</h2>
-        <p class="section-subhead">Aspire lets you declare every service and every resource in plain C#, then runs the lot with one command.</p>
+        <p class="section-subhead">Aspire lets you declare every service and every resource in plain C# or TypeScript, then runs the lot with one command. </p>
       </header>
       <div class="prose">
-        <p>The orchestrator project is the top of the system. It doesn't contain business logic; its only job is to declare what exists and how it connects. You list the backing resources (storage, the conversation database), you list the services (the tool server, the two stages, the operator UI), and you describe the references between them. Aspire takes that declaration and brings the whole thing up, wiring connection strings and service discovery so no service has to hardcode where another one lives.</p>
-        <p>The neat trick is that the same file behaves differently depending on whether you're running locally or publishing. Locally, the storage and database resources run as emulators in containers, so you need no cloud account to develop. When you publish, those same declarations resolve to real Azure resources. One description, two environments.</p>
+        <p>The orchestrator project is the entry point of the system. It doesn't contain business logic. Its only job is to declare what exists and how it connects. You list the backing resources (key vault, storage, databases), you list the services (MCP server, agent container apps, the optional frontend), and you describe the references between them. Aspire takes that declaration and stands it up, wiring connection strings and service discovery so no service has to hardcode where another one lives.</p>
+        <p>The neat trick is that the same file behaves differently depending on whether you're running locally or publishing. Locally, the storage and database resources run as emulators in containers using Docker, so you need no cloud account to develop. When you publish, those same declarations resolve to real Azure resources. One description, two environments. It makes local development a breeze!</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">var builder = DistributedApplication.CreateBuilder(args);
 
@@ -123,16 +152,16 @@ builder.AddProject&lt;Projects.OperatorUi&gt;("operatorui")
 
 builder.Build().Run();</code></pre>
       <div class="prose">
-        <p>Read that top to bottom and you've read the system's wiring diagram. Two storage handles (one for the bridge, one for finished work), a Cosmos database for run transcripts, the tool server, the two stages, and the UI. The <code>WaitFor(tools)</code> calls say "don't start the agents until the tools are up," and the <code>WithReference</code> calls are what give each service the connection details for the things it depends on. Notice the deliberate asymmetry: processing references intake (it posts progress back to it), but intake does not reference processing. Intake writes a work item and walks away. That one-way reference is the storage seam showing up in the wiring.</p>
+        <p>Read that top to bottom and you've read the system's wiring diagram. Two storage handles (one for the bridge, one for finished work), a Cosmos database for agent session persistence, the tool server, the two workflow container app projects, and the optional frontend. The <code>WaitFor(tools)</code> calls say "don't start the agents until the tools are up," and the <code>WithReference</code> calls are what give each service the connection details for the things it depends on. Notice the deliberate asymmetry: processing references intake (it posts progress back to it), but intake does not reference processing. Intake writes a work item and walks away. That one-way reference is the storage seam showing up in the wiring.</p>
       </div>
       <div class="callout">
         <span class="callout-label">A general lesson, not an Aspire one</span>
-        <p>Even if you never touch Aspire, the principle travels: keep one declarative description of how your services and resources fit together, and make it environment-agnostic so local and production differ only in what the resource handles resolve to. Aspire is a tidy way to do this in .NET, but the value is in the single source of truth, not the specific API.</p>
+        <p>Even if you never touch Aspire, the concept remains the same: keep one declarative description of how your services and resources fit together, and make it environment-agnostic so local and production differ only in what the resource handles resolve to. Aspire is a tidy way to do this in .NET, but the value is in the single source of truth, not the specific API.</p>
       </div>
     </section>
     <hr class="section-divider">
 
-    <section class="chapter-section">
+    <section class="chapter-section binary-fade">
       <header class="section-heading">
         <span class="eyebrow">Inside a Service</span>
         <h2>Wiring One Process, From Config to Agents</h2>
@@ -163,7 +192,7 @@ app.Run();</code></pre>
         <p>The piece worth lingering on is <code>AgentPool</code>. Rather than scatter agent construction across the codebase, the system funnels it through one component that knows how to build a configured agent. When something needs the researcher, it asks the pool; it never news up a <code>ChatClientAgent</code> itself. That centralization is what lets the middleware stack from Chapter 11 be applied uniformly: the pool builds the model client, wraps it in the fluent chain, and hands back a finished agent.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">// Inside AgentPool: build the model client, wrap it in cross-cutting layers,
-// then construct the agent. Every agent in the system is born this way.
+// then construct the agent. Every agent in the system is instantiated this way.
 IChatClient client = chatClientProvider.GetChatClient()
     .WithRateLimitRetry()
     .WithAgent365Baggage(baggage)
@@ -190,8 +219,8 @@ var researcher = new ChatClientAgent(client, new ChatClientAgentOptions
         <p class="section-subhead">A disciplined composition root is what makes every later chapter's "just swap this" claim actually true.</p>
       </header>
       <div class="prose">
-        <p>It's tempting to treat the composition root as boilerplate and stop reading. Resist that, because the discipline here is what cashes out everywhere else in the guide. When the only place that constructs a model client is the agent pool, swapping Azure OpenAI for a hosted prompt agent is a change in one method, not a hunt through the codebase. When the only place that declares storage is the orchestrator, moving from emulators to real Azure is a publish-time concern, not a code change. When credentials come from an injected <code>TokenCredential</code>, the agents never learn whether they're running on your laptop or in the cloud.</p>
-        <p>The rule of thumb is simple: construct at the edges, inject everywhere else. The root knows how things are built; nothing else does. Keep that line clean and the system stays soft enough to reshape. Blur it (new up a client deep inside an agent, hardcode a connection string in a handler) and every future change gets a little harder.</p>
+        <p>It's tempting to treat the composition root as boilerplate and stop reading. Resist that, because the discipline here is what pays off everywhere else in the guide. When the only place that constructs a model client is the agent pool, swapping Azure OpenAI for a hosted prompt agent (Foundry or another service) is a change in one method, not a hunt through the codebase. When the only place that declares storage is the orchestrator, moving from emulators to real Azure is a publish-time concern, not a code change. When credentials come from an injected <code>TokenCredential</code>, the agents never learn whether they're running on your laptop or in the cloud.</p>
+        <p>The rule of thumb is to construct at the edges, inject everywhere else. The root knows how things are built; nothing else does. Maintain that boundary and the system stays clean enough to reshape. Blur it (new up a client deep inside an agent, hardcode a connection string in a handler) and every future change gets a little harder.</p>
         <p>With the wiring understood, we can start following the work. The first thing that runs after an event arrives is the intake stage, and it's built as an explicit two-node workflow graph. That's where we go next.</p>
       </div>
     </section>

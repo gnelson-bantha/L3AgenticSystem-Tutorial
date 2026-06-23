@@ -68,15 +68,15 @@
       <p class="chapter-subhead">Three agents taking turns in a shared conversation, with no routing code for you to write.</p>
     </header>
 
-    <section class="chapter-section">
+    <section class="chapter-section dot-fade">
       <header class="section-heading">
         <span class="eyebrow">A Different Shape</span>
         <h2>Three Agents, One Conversation</h2>
-        <p class="section-subhead">Intake was a straight line of typed messages; this stage is a conversation, and the difference is the whole point.</p>
+        <p class="section-subhead">Intake was a straight line of typed messages. This stage is a conversation.</p>
       </header>
       <div class="prose">
-        <p>The poller just launched a run for one work item. Inside that run, the work is genuinely open-ended: research something, write it up, judge whether the write-up is good, and possibly go around again. You can't draw that as a fixed line of nodes ahead of time, because how many laps it takes depends on what the agents produce. So instead of intake's explicit graph, processing uses the Agent Framework's other coordination style: a Group Chat.</p>
-        <p>In a Group Chat, the agents share a single conversation transcript. Each one can read everything said so far, and a manager decides who speaks next. They don't pass typed messages along wired edges; they just talk, in natural language, into a common thread. The researcher's findings, the generator's draft, the reviewer's verdict are all messages in one transcript that every participant can see. That shared context is what lets them collaborate without you hand-coding the handoffs.</p>
+        <p>The poller just launched a run for one work item. Inside that run, the work is genuinely open-ended: research something, write it up, judge whether the write-up is good, and possibly go around again. You can't draw that as a fixed line of nodes ahead of time, because how many laps it takes depends on what the agents produce. So instead of intake's explicit graph, processing uses the Microsoft Agent Framework SDK's built-in orchestration pattern: a Group Chat.</p>
+        <p>In a Group Chat, the agents share a single conversation transcript. Each one can read everything said so far, and a manager decides who speaks next. They don't pass typed messages along wired edges. They just talk, in natural language, into a common thread. The researcher's findings, the generator's draft, the reviewer's verdict are all messages in one transcript that every participant can see. That shared context is what lets them collaborate without you hand-coding the handoffs.</p>
       </div>
       <div class="card-grid">
         <div class="info-card">
@@ -99,10 +99,10 @@
       <header class="section-heading">
         <span class="eyebrow">Assembly</span>
         <h2>Building the Group Chat</h2>
-        <p class="section-subhead">A builder, a manager, three participants, and a seed message: the run is four lines of setup.</p>
+        <p class="section-subhead">A builder, a manager, three participants, and a seed message: just four lines of setup.</p>
       </header>
       <div class="prose">
-        <p>The collaboration runner is what the poller calls per work item. It pulls the three agents from the pool, hands them to a Group Chat builder along with a manager, and starts the conversation with a seed message describing the job. The framework takes it from there: it loops, asking the manager who goes next and feeding each agent the shared transcript, until the manager says to stop.</p>
+        <p>The collaboration runner is what the poller calls per work item. It pulls the three agents from the pool, hands them to a Group Chat builder along with a manager, and starts the conversation with a seed message describing the job. The framework takes it from there. It loops, asking the manager who goes next and feeding each agent the shared transcript, until the manager says to stop.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">public async Task RunAsync(WorkItem item, CancellationToken ct)
 {
@@ -126,20 +126,21 @@
     await SaveDeliverableAsync(item, result);   // persist and notify (Chapters 13, 14)
 }</code></pre>
       <div class="prose">
-        <p>Compare this to the intake graph and the philosophy difference is clear. Intake said exactly which node feeds which. Here we just name the participants and a manager, and the coordination emerges from the conversation. You added an agent to intake by adding an edge; you'd add an agent here by adding it to the participant list. The framework absorbs the wiring.</p>
+        <p>Compare this to the intake graph and you'll see a different, simpler approach to coordination. Intake said exactly which node feeds which, and required derived implementations of executors. Here we just name the participants and a manager, and the coordination emerges from the conversation. You added an agent to intake by implementing a class deriving from <code>ReflectingExecutor</code> and adding an edge. You'd add an agent here by simply adding it to the participant list. The framework absorbs the wiring.</p>
       </div>
     </section>
     <hr class="section-divider">
 
-    <section class="chapter-section">
+    <section class="chapter-section binary-fade">
       <header class="section-heading">
         <span class="eyebrow">Soft Coordination</span>
         <h2>Coordinating Through Natural-Language Signals</h2>
         <p class="section-subhead">The agents steer each other not with code but with agreed phrases dropped into their messages.</p>
       </header>
       <div class="prose">
-        <p>If nobody wires the handoffs, how does the research agent tell the generator "I'm done, your turn"? Through the conversation itself. The agents are instructed to end their messages with specific marker phrases, and the others (and the manager) react to those markers. It's coordination by convention rather than by code, and it's surprisingly effective because the markers are right there in the shared transcript for everyone to read.</p>
-        <p>The research agent, for instance, has an escape hatch. If it decides the event has no real effect on this target, it doesn't waste the generator's time; it signals that the work is essentially a no-op and the chat can wind down with a minimal result. Otherwise it signals that there's enough to write about.</p>
+        <p>If nobody wires the handoffs, how does the research agent tell the generator "I'm done, your turn"? Through the conversation itself, the agents are instructed to end their messages with specific marker phrases, and the others (and the manager) react to those markers. It's coordination by convention rather than by code, and it's surprisingly effective because the markers are right there in the shared transcript for everyone to read.</p>
+        <p>The research agent, for instance, has an escape hatch. If it decides the event has no real effect on this target, it doesn't waste the generator's time. It signals that the work is essentially a no-op and the chat can wind down with a minimal result. Otherwise it signals that there's enough to write about.</p>
+        <p>It should be noted that this isn't the only way of signaling coordination. In fact, to some this may not be durable, but it's the simplest solution that doesn't require additional infrastructure for custom signals and hand-offs between agents.</p>
       </div>
       <pre class="codeblock"><code class="language-text">Research agent instructions (excerpt)
 
@@ -149,11 +150,11 @@ MINIMAL_IMPACT followed by a one-line reason, and do not gather further detail.
 Otherwise, gather the relevant facts from the data tools and end your message
 with GENERATE_REPORT, which tells the generator it has enough to begin.</code></pre>
       <div class="prose">
-        <p>The generator does its own small triage when it's handed the conversation. If the research looks thin for what's being asked, it can say so and effectively send the ball back rather than writing on a weak foundation; if the research is solid, it proceeds straight to drafting. These signals (a request for more research, or a decision to write directly) keep the team from lurching forward on bad inputs. None of it is enforced by types or method calls. It's a shared vocabulary the agents agree to use, read out of the common transcript.</p>
+        <p>The generator does its own small triage when it's handed the conversation. If the research looks thin for what's being asked, it can say so and effectively send the ball back rather than writing on a weak foundation. If the research is solid, it proceeds straight to drafting. These signals (a request for more research, or a decision to write directly) keep the team from lurching forward on bad inputs. None of it is enforced by types or method calls. It's a shared vocabulary the agents agree to use, read out of the common transcript.</p>
       </div>
       <div class="callout">
         <span class="callout-label">Why this works, and where to be careful</span>
-        <p>Natural-language signals are flexible and need zero plumbing, which is why they're a joy to prototype with. The cost is that they lean on the model actually emitting the agreed phrase, so the marker words should be distinctive, the instructions should be blunt about the exact format, and anything that reads a marker should fail safe when it's missing. The reviewer's approval signal in the next chapter is held to exactly that standard, because a missed approval there has real consequences.</p>
+        <p>Natural-language signals are flexible and need zero plumbing, which is why they're a joy to prototype with. The cost is that they lean on the model actually emitting the agreed phrase, so the marker words should be distinctive, the instructions should be blunt about the exact format, and anything that reads a marker should fail safe when it's missing.</p>
       </div>
     </section>
     <hr class="section-divider">
@@ -162,11 +163,15 @@ with GENERATE_REPORT, which tells the generator it has enough to begin.</code></
       <header class="section-heading">
         <span class="eyebrow">The Conductor</span>
         <h2>Round-Robin, and Why There's a Manager at All</h2>
-        <p class="section-subhead">The manager is a small bridge with outsized power, which is exactly why the next chapter lives inside it.</p>
+        <p class="section-subhead">The manager is a small bridge with outsized power.</p>
       </header>
       <div class="prose">
-        <p>The manager's job is to answer two questions on every turn: who speaks next, and are we done? In this system the "who speaks next" answer is a plain round-robin, the agents take turns in order, which is about the simplest policy there is and works fine for a three-agent team with a clear rhythm. You could make it smarter (let the manager read the transcript and pick the most relevant next speaker), but round-robin keeps the behavior predictable and easy to reason about.</p>
-        <p>The "are we done?" question is where the real leverage hides. The default would be to stop after some fixed number of turns. That's not good enough for an autonomous system, because the right time to stop is "when the reviewer is satisfied," which you can't know in advance. So the system subclasses the round-robin manager and teaches it to watch for the reviewer's approval, while still keeping a hard ceiling so a never-satisfied reviewer can't loop forever. That custom termination logic is the self-correcting feedback loop, and it's important enough to get the whole next chapter.</p>
+        <p>The manager's job is to answer two questions on every turn: who speaks next, and are we done? In this system the "who speaks next" answer is a plain round-robin, the agents take turns in order, without a human in the loop.</p>
+        <p>The "are we done?" question is where the real leverage hides. The default would be to stop after some fixed number of turns. That's not good enough for an autonomous system, because the right time to stop is "when the reviewer is satisfied," which you can't know in advance. So the system subclasses the round-robin manager and teaches it to watch for the reviewer's approval, while still keeping a hard ceiling so a never-satisfied reviewer can't loop forever. That custom termination logic is the self-correcting feedback loop.</p>
+      </div>
+      <div class="callout">
+        <span class="callout-label">A more sophisticated alternative</span>
+        <p>An alternative approach would be to use the Magentic orchestration pattern, also built-in to the framework. It's a rather new and experimental approach that allows for more sophisticated control over the conversation flow. You can learn more about it here: <a href="https://learn.microsoft.com/en-us/agent-framework/workflows/orchestrations/magentic?pivots=programming-language-csharp" target="_blank">Magentic Orchestration</a>.</p>
       </div>
     </section>
   </main>

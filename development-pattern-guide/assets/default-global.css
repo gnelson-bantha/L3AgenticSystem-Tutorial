@@ -628,6 +628,8 @@ hr.section-divider:has(+ .binary-fade) { margin-bottom: 0; }
   color: var(--link);
 }
 .callout p { font-size: var(--text-sm); line-height: var(--leading-normal); color: var(--ink); }
+.callout p a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+.callout p a:hover { text-decoration-thickness: 2px; }
 
 /* Important banner (high-emphasis callout) */
 .important-banner {

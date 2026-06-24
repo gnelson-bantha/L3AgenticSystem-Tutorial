@@ -31,7 +31,7 @@ jobs:
         run: |
           mkdir -p _site
           mkdir -p _site/
-          cp -R development-pattern-guide/* _site/
+          cp -R development-pattern-guide/ . _site/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

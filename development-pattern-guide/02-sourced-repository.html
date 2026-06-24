@@ -84,6 +84,43 @@
 
     <section class="chapter-section">
       <header class="section-heading">
+        <span class="eyebrow">The Whole Picture</span>
+        <h2>The Reference Architecture</h2>
+        <p class="section-subhead">Let's walk through the architecture as a whole, together, before we start pulling pieces apart.</p>
+      </header>
+      <div class="prose">
+        <p>Picture a <strong>marketing firm</strong> whose job is to keep its clients (a roster of retailers) informed of anything happening in the world that could affect their businesses. The architecture below is the blueprint for the distributed, agentic system works autonomously to respond to such events by generating a draft impact report. Here are the key components:</p>
+        <ul>
+          <li><strong>Change Event Source</strong> - an event that could have a deep impact on one or more of the firm's clients.</li>
+          <li><strong>Workflow: Change Event Evaluation</strong> - the first workflow container app, which listens for and reacts to events. When an event is detected, its information is summarized and passed to an evaluation agent. That agent reviews all of the firm's clients, compiles a list of those that may be impacted, and persists a small file with the event's details and the impacted-client list to blob storage.</li>
+          <li><strong>Storage</strong> - the bridge between the two workflow container apps. Workflow 1 drops the data off, and Workflow 2 picks it up.</li>
+          <li><strong>Workflow: Change Event Processing</strong> - the second workflow, triggered when Workflow 1 drops off a new event payload. It reads the event information and spins up a Level 3 autonomous agentic workflow for each impacted client:
+            <ol>
+              <li>A <strong>researcher</strong> agent researches the event and the client.</li>
+              <li>It passes the research data package to a <strong>generator</strong> agent that produces a rough-draft impact report.</li>
+              <li>The draft goes to a <strong>reviewer</strong> agent that either approves it or sends it back for revisions.</li>
+              <li>When the reviewer approves the report, it is persisted to a database.</li>
+            </ol>
+          </li>
+          <li><strong>CosmosDB</strong> - the database where Workflow 2's conversation history is persisted alongside the impact report once the reviewer approves it.</li>
+          <li><strong>Report Sentinel</strong> - alerts the human user that a report is ready for review.</li>
+          <li><strong>Human on the Loop</strong> - reviews the report, and can either approve it or send it back to Workflow 2 with feedback so the agents can keep iterating on it.</li>
+        </ul>
+        <p>One big takeaway from the components listed above is that the workflows themselves are designed to be independent and scalable. They are built to operate in isolation as hosted containers.</p>
+        <figure class="arch-figure">
+          <img src="images/L3AgenticSystem-ARC.png" alt="Reference architecture of the Sample Level 3 Agentic System: a Change Event Source feeds the Change Event Evaluation workflow (Listener, Summarizer, Evaluator) which writes events and a retailer list to Storage; the Change Event Processing workflow reads from Storage and runs one instance per retailer, with a Researcher, Generator/Writer, and Reviewer collaborating through a Group Chat Orchestrator, writing finished reports to CosmosDB. A Human on the Loop with a Report Sentinel optionally oversees the review cycle. A bottom band shows required Azure services (Foundry, Key Vault) and the observability and control plane (Log Analytics, Agent 365, Purview, Defender).">
+        </figure>
+      </div>
+      <p>When boiled down, this system has two distinct parts: intake on the left, processing on the right with a storage container bridging the two. This is all wrapped up via human oversight up top, and the Azure foundation underneath indicating which services are required to run the L3AgenticSystem sample. We will delve into each of these components from the vantage point of defining the development "pattern" in this guide.</p>
+      <div class="callout">
+        <h3>A Quick Word on Selected Services</h3>
+        <p>While the architecture and the pattern present as opinionated on which services fulfill key roles in the system, many can be substituted for alternative services or implementations without changing the overall design or functionality. This will be discussed in later chapters as we explore the nuances of each component.</p>
+      </div>
+    </section>
+    <hr class="section-divider">
+
+    <section class="chapter-section">
+      <header class="section-heading">
         <span class="eyebrow">Topology</span>
         <h2>Two Hosts Joined by a Blob Container</h2>
         <p class="section-subhead">The solution splits at one clean line, and that line is a storage account.</p>

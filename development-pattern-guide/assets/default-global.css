@@ -1144,6 +1144,29 @@ pre.codeblock code.hljs { display: block; padding: 0; background: transparent; c
   color: var(--ink-subtle);
 }
 
+/* Architecture figure — full-width reference diagram (raster image, ch.2) */
+.arch-figure { margin: var(--space-6) 0 0; }
+.arch-figure img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  padding: var(--space-5);
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+}
+.arch-figure figcaption {
+  margin-top: var(--space-3);
+  max-width: var(--measure);
+  font-family: var(--font-subheader);
+  font-style: italic;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--ink-subtle);
+}
+
 /* Trait comparison: two info-cards contrasting the stages on shared axes. */
 .trait-list { margin: var(--space-2) 0 0; }
 .trait-list > div {

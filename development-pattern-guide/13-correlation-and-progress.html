@@ -68,7 +68,7 @@
       <p class="chapter-subhead">One id that threads the whole pipeline, and progress that crosses the boundary between two separate processes.</p>
     </header>
 
-    <section class="chapter-section">
+    <section class="chapter-section dot-fade">
       <header class="section-heading">
         <span class="eyebrow">The Visibility Problem</span>
         <h2>Following One Event Through Two Processes</h2>
@@ -76,7 +76,11 @@
       </header>
       <div class="prose">
         <p>The decoupling we worked so hard for has a flip side. Intake and processing are separate processes that never call each other, which is wonderful for scaling and terrible for answering a simple operator question: "I submitted an event a minute ago, what's happening to it?" There's no single call stack to follow, no one process that sees the whole journey. The event fans out into work items, those scatter across parallel runs in a different service, and nobody is holding the thread.</p>
-        <p>So the system holds the thread deliberately, with two complementary moves. First, a single correlation id is born the instant an event arrives and rides along on every artifact the event ever produces, so all of its scattered activity can be stitched back together after the fact. Second, the processing service actively reports progress back across the boundary, so the operator can watch in something close to real time. The id is for correlation; the reporting is for liveness. Together they give you a coherent view of a deliberately incoherent topology.</p>
+        <p>So the system holds the thread deliberately, with two complementary moves. First, a single correlation id is born the instant an event arrives and rides along on every artifact the event ever produces, so all of its scattered activity can be stitched back together after the fact. Second, the processing service actively reports progress back across the boundary, so the operator can watch in something close to real time. The id is for correlation; the reporting is for liveness. Together they give you a coherent view of a deliberately incoherent topology.</p>        
+      </div>
+      <div class="callout">
+        <span class="callout-label">Visibility (Demo UI) is Optional</span>
+        <p>The Demo UI and visualization of progress is optional. It is not critical to the function of the pattern overall. That said, it has the added benefit of enabling visualization for the entire lifecycle of an event, allowing operators to see the flow of work from intake to completion.</p>
       </div>
     </section>
     <hr class="section-divider">
@@ -108,7 +112,7 @@
     </section>
     <hr class="section-divider">
 
-    <section class="chapter-section">
+    <section class="chapter-section binary-fade">
       <header class="section-heading">
         <span class="eyebrow">Phoning Home</span>
         <h2>Reporting Progress Back Across the Boundary</h2>
@@ -129,7 +133,7 @@
             new CompletionUpdate(correlationId, targetId));
 }</code></pre>
       <div class="prose">
-        <p>The detail that keeps this clean is how processing finds intake. It doesn't hardcode a URL. The HTTP client is configured against the intake service's logical name, and Aspire's service discovery resolves that name to the right address in whatever environment you're running, your laptop or the cloud. This is the back-reference from the orchestrator chapter showing up in code: the wiring said processing references intake, and here's what that reference is for.</p>
+        <p>The detail that keeps this clean is how processing finds intake. It doesn't hardcode a URL. The HTTP client is configured against the intake service's logical name, and Aspire's service discovery resolves that name to the right address in whatever environment you're running, your computer or the cloud. This is the back-reference from the orchestrator chapter showing up in code.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">// No hardcoded address. Aspire resolves the logical service name "intakehost"
 // to the real endpoint, the same locally and in production.
@@ -154,8 +158,8 @@ var events = await http.GetFromJsonAsync&lt;IReadOnlyList&lt;EventStatus&gt;&gt;
 // EventStatus per event: correlation id, detected / inFlight / completed counts,
 // and the per-target state behind each event's tab.</code></pre>
       <div class="prose">
-        <p>It's worth noticing how little the UI has to know. It doesn't talk to processing, doesn't read the bridge, doesn't understand the agents. It asks intake one question and draws the answer. All the cross-process complexity was absorbed by the correlation id and the progress reports, leaving the front end with an almost trivial job. That's the payoff of doing the threading properly: visibility becomes a rendering problem instead of a distributed-systems problem.</p>
-        <p>This progress plumbing also quietly sets up the final piece of the pattern. The status the operator sees includes deliverables that finished, and a finished deliverable is something a human might want to push back on. Re-opening one and sending it back through the same agents is the last behavior we'll build, and it's next.</p>
+        <p>It's worth noticing how little the UI has to know. It doesn't talk to processing, doesn't read the bridge, doesn't understand the agents. It asks intake one question and draws the answer. All the cross-process complexity was absorbed by the correlation id and the progress reports, leaving the front end with an almost trivial job. That's the payoff of doing the threading properly. Visibility becomes a rendering problem instead of a distributed-systems problem.</p>
+        <p>This progress plumbing also quietly sets up the final piece of the pattern. The status the operator sees includes deliverables that finished, and a finished deliverable is something a human might want to push back on. Re-opening one and sending it back through the same agents is the last behavior we'll build.</p>
       </div>
     </section>
   </main>

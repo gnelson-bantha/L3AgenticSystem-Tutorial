@@ -68,15 +68,15 @@
       <p class="chapter-subhead">Keeping a long, multi-turn agent conversation from blowing past the model's context window.</p>
     </header>
 
-    <section class="chapter-section">
+    <section class="chapter-section dot-fade">
       <header class="section-heading">
-        <span class="eyebrow">The Squeeze</span>
+        <span class="eyebrow">The Limitation</span>
         <h2>The Window Always Fills</h2>
-        <p class="section-subhead">A self-correcting loop is a conversation that grows, and the model can only hold so much.</p>
+        <p class="section-subhead">A self-correcting loop is a conversation that grows, and the model can only hold so much context.</p>
       </header>
       <div class="prose">
-        <p>Think about what a processing run actually accumulates. The research agent dumps in findings, sometimes large tool results. The generator writes a full draft, then another, then another as the reviewer sends it back. The reviewer adds critique each lap. By the time a hard case has gone three or four rounds, the shared transcript is long, and every model call has to fit inside the context window. A long autonomous loop is, by its nature, a conversation that grows without anyone pruning it.</p>
-        <p>You can't just let it overflow, and you can't just chop off the oldest messages either, because the early context (the brief, the key findings) is often what keeps the later turns coherent. What you want is to shrink the conversation thoughtfully: shed what's least valuable, preserve what carries meaning, and only get aggressive when you truly have to. The Agent Framework ships a mechanism for exactly this, and the system uses it as the outermost middleware layer from the last chapter.</p>
+        <p>Think about what a processing run <em>actually</em> accumulates. The research agent dumps in findings, sometimes large tool results. The generator writes a full draft, then another, then another as the reviewer sends it back. The reviewer adds critique each lap. By the time a hard case has gone three or four rounds, the shared transcript is long, and every model call has to fit inside the context window. A long autonomous loop is, by its nature, a conversation that grows without anyone pruning it.</p>
+        <p>You can't just let it overflow, and you can't just chop off the oldest messages either, because the early context (the brief, the key findings) is often what keeps the later turns coherent. What you want is to shrink the conversation thoughtfully. Shed what's least valuable, preserve what carries meaning, and only get aggressive when you truly have to. The Microsoft Agent Framework SDK ships a mechanism for exactly this, and the system uses it as the outermost middleware layer from the last chapter.</p>
       </div>
     </section>
     <hr class="section-divider">
@@ -88,7 +88,8 @@
         <p class="section-subhead">Rather than one blunt rule, compaction is a ladder of trims that each fire only when needed.</p>
       </header>
       <div class="prose">
-        <p>The clever part is that compaction isn't a single tactic; it's a pipeline of strategies arranged from gentlest to bluntest, each guarded by its own threshold. They're composed with the framework's <code>PipelineCompactionStrategy</code>, which runs them in order and only applies the ones whose trigger has been crossed. On a short conversation, none of them fire. As it grows, they kick in one at a time, escalating only as far as the pressure demands.</p>
+        <p>Compaction isn't a single tactic. It's a pipeline of strategies arranged from gentlest to bluntest, each guarded by its own threshold. They're composed with the framework's <code>PipelineCompactionStrategy</code>, which runs them in order and only applies the ones whose trigger has been crossed. On a short conversation, none of them fire. As it grows, they kick in one at a time, escalating only as far as the pressure demands.</p>
+        <p>These values can be configured, allowing you to fine-tune the compaction behavior to your specific needs.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">// Ordered gentlest to bluntest. Each fires only when its own threshold is crossed,
 // so a run escalates exactly as far as the conversation's size forces it to.
@@ -107,11 +108,11 @@ var strategy = new PipelineCompactionStrategy(
     new TruncationCompactionStrategy    { TokensExceed = 32000 },
 ]);</code></pre>
       <div class="prose">
-        <p>Read the ladder and the philosophy is obvious. First it removes tool results, which are big and rarely needed verbatim once the agent has used them. If tokens still climb, it summarizes older turns, trading exact wording for compressed meaning. If the chat is still long, it slides a window over the recent turns and lets the older ones fall away. And only if all of that isn't enough does it hard-truncate, the bluntest move, reserved as a final guarantee that a call never exceeds the window. Each step is more lossy than the one before, which is exactly why each is tried only after the gentler ones came up short.</p>
+        <p>The first step is to drop tool results, which are big and rarely needed verbatim once the agent has used them. If tokens still climb, it summarizes older turns, trading exact wording for compressed meaning. If the chat is still long, it slides a window over the recent turns and lets the older ones fall away. And only if all of that isn't enough does it hard-truncate, the bluntest move, reserved as a final guarantee that a call never exceeds the window. Each step is more lossy than the one before, which is why each is tried only after the gentler ones came up short.</p>
       </div>
       <div class="card-grid">
         <div class="info-card">
-          <h3>Tool-result trimming</h3>
+          <h3>Tool-result Trimming</h3>
           <p>The lightest touch. Verbose tool payloads are dropped once the conversation has enough messages, since the agent has already consumed what it needed from them.</p>
         </div>
         <div class="info-card">
@@ -119,7 +120,7 @@ var strategy = new PipelineCompactionStrategy(
           <p>Older turns get folded into a compact summary as token counts rise, keeping the gist of the conversation while reclaiming a lot of room.</p>
         </div>
         <div class="info-card">
-          <h3>Sliding window</h3>
+          <h3>Sliding Window</h3>
           <p>When the turn count itself grows large, only the most recent turns are kept in full, on the bet that recency carries most of the working context.</p>
         </div>
         <div class="info-card">
@@ -130,14 +131,14 @@ var strategy = new PipelineCompactionStrategy(
     </section>
     <hr class="section-divider">
 
-    <section class="chapter-section">
+    <section class="chapter-section binary-fade">
       <header class="section-heading">
         <span class="eyebrow">Wiring</span>
         <h2>Plugging It In Per Agent</h2>
         <p class="section-subhead">The strategy pipeline rides inside a provider that gives each agent its own compacted view.</p>
       </header>
       <div class="prose">
-        <p>The strategy pipeline is wrapped in a <code>CompactionProvider</code>, and that provider is what the <code>.WithCompaction(...)</code> layer from the previous chapter installs. Under the hood it registers as an AI context provider with <code>UseAIContextProviders</code>, keyed per agent. That per-agent keying matters: each participant in the Group Chat keeps and compacts its own view of the conversation, so the researcher's window and the generator's window are managed independently rather than sharing one pool.</p>
+        <p>The strategy pipeline is wrapped in a <code>CompactionProvider</code>, and that provider is what the <code>.WithCompaction(...)</code> layer from the previous chapter installs. Under the hood it registers as an AI context provider with <code>UseAIContextProviders</code>, keyed per agent. That per-agent keying ensures that each participant in the Group Chat keeps and compacts <em>its own view</em> of the conversation, so the researcher's window and the generator's window are managed independently rather than sharing one pool.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">// The provider carries the strategy pipeline. .WithCompaction(...) registers it as
 // a per-agent AI context provider, so every agent manages its own context budget.
@@ -148,7 +149,7 @@ IChatClient client = baseChatClient
     .WithCompaction(compaction);   // outermost: trims before any inner layer runs</code></pre>
       <div class="callout">
         <span class="callout-label">A heads-up about experimental APIs</span>
-        <p>The compaction types are marked experimental in the Agent Framework (they surface a diagnostic with the id <code>MAAI001</code>), which is the framework's way of saying the surface may still shift. You opt in deliberately by acknowledging that diagnostic where you use them. It's a small ceremony, but a useful signal: pin your versions and expect these particular APIs to evolve faster than the stable core.</p>
+        <p>As of June 2026, the compaction types are marked experimental in the Microsoft Agent Framework (they surface a diagnostic with the id <code>MAAI001</code>), which is the framework's way of saying the functionality may still shift. You opt in deliberately by acknowledging that diagnostic where you use them. Pin your versions and expect these particular APIs to evolve faster than the stable core.</p>
       </div>
     </section>
     <hr class="section-divider">
@@ -157,12 +158,12 @@ IChatClient client = baseChatClient
       <header class="section-heading">
         <span class="eyebrow">The Lesson</span>
         <h2>Escalation Beats a Single Blunt Rule</h2>
-        <p class="section-subhead">The design generalizes well beyond context windows, which is why it's worth lingering on.</p>
+        <p class="section-subhead">The design generalizes well beyond context windows.</p>
       </header>
       <div class="prose">
-        <p>Step back from the specifics and there's a tidy principle here. When you have to give something up under pressure, don't reach for the most destructive option first. Arrange your responses from least costly to most costly, gate each behind a threshold, and let the situation decide how far up the ladder you climb. Most of the time the gentle moves are enough and the blunt ones never fire. When a genuinely hard case shows up, you still have a guaranteed backstop, but you reached it only after exhausting the kinder options.</p>
-        <p>That shape, ordered strategies with escalating cost and per-step triggers, shows up all over robust systems: cache eviction, load shedding, retry-and-degrade. Compaction is just a particularly clear instance of it, applied to the one resource an autonomous agent loop will always strain against. It's the last piece of the cross-cutting machinery.</p>
-        <p>With the agents fully equipped, we can zoom back out to the system level and answer a question we've been deferring: how do you follow one event across two separate processes, and how does the operator see progress while it all happens in the background? That's correlation and progress, and it's next.</p>
+        <p>Taking a step back, when you have to give something up under pressure, don't reach for the most destructive option first. Arrange your responses from least costly to most costly, gate each behind a threshold, and let the situation decide how far up the ladder you climb. Most of the time the gentle moves are enough and the blunt ones never fire. When a genuinely hard case shows up, you still have a guaranteed backstop, but you reached it only after exhausting the kinder options.</p>
+        <p>That shape, ordered strategies with escalating cost and per-step triggers, shows up all over robust systems (e.g. cache eviction, load shedding, retry-and-degrade). Compaction is just a particularly clear instance of it, applied to the one resource an autonomous agent loop will always strain against. It's the last piece of the cross-cutting machinery.</p>
+        <p>With the agents fully equipped, we can zoom back out to the system level and answer a question we've been deferring: how do you follow one event across two separate processes, and how does the operator see progress while it all happens in the background? Moving right along to the optional Demo UI...</p>
       </div>
     </section>
   </main>

@@ -29,9 +29,9 @@ jobs:
 
       - name: Stage site
         run: |
-          mkdir -p _site
-          mkdir -p _site/
-          cp -R development-pattern-guide/ . _site/
+          rm -rf _site
+          mkdir _site
+          rsync -av development-pattern-guide/ _site/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

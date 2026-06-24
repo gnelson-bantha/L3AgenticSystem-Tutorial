@@ -65,18 +65,18 @@
     <header class="chapter-header">
       <p class="chapter-eyebrow">Chapter 15</p>
       <h1 class="chapter-title">Extending the System</h1>
-      <p class="chapter-subhead">The seams you built for decoupling are the same seams you extend through. Here's where each one opens up.</p>
+      <p class="chapter-subhead">The bridges you built for decoupling are the same bridges you extend through. Here's where each one opens up.</p>
     </header>
 
-    <section class="chapter-section">
+    <section class="chapter-section dot-fade">
       <header class="section-heading">
         <span class="eyebrow">Where to Push</span>
         <h2>The Decouplings Are the Extension Points</h2>
         <p class="section-subhead">Every boundary the pattern drew to keep things apart doubles as a place to add something new.</p>
       </header>
       <div class="prose">
-        <p>Now that the whole pattern is on the table, a nice property falls out of it: you already know where to extend it, because the extension points are exactly the boundaries you spent the last ten chapters building. Dependency injection at the composition root is where you add a participant. The protocol boundary in front of tools is where you add a capability. The storage bridge is where you change how work is dispatched. The middleware chain is where you add a cross-cutting concern. The workflow graph is where you change how the system is triggered. None of these required foresight about <em>this specific</em> extension; they were drawn for separation, and separation is what makes them open.</p>
-        <p>That's the quiet reward of building along clean seams. You don't extend this system by editing its core; you extend it by adding a part at a boundary and letting the existing composition pick it up. Let's walk the boundaries one at a time and see what each lets you add.</p>
+        <p>Now that we understand the whole pattern, we can identify the extension points. Each of the boundaries we've established in the pattern serves as an extension point. Dependency injection at the composition root is where you add a participant. The protocol boundary in front of tools is where you add a capability. The storage bridge is where you change how work is dispatched. The middleware chain is where you add a cross-cutting concern. The workflow graph is where you change how the system is triggered. None of these required foresight about <em>this specific</em> extension.</p>
+        <p>That's the benefit of decoupling. You don't extend this system by editing its core. You extend it by adding a part at a boundary and letting the existing composition pick it up. Let's walk the boundaries one at a time and see what each lets you add.</p>
       </div>
     </section>
     <hr class="section-divider">
@@ -88,7 +88,7 @@
         <p class="section-subhead">A new collaborator joins the participant list; a new capability joins the tool server.</p>
       </header>
       <div class="prose">
-        <p>Adding an agent is almost anticlimactic. You build it through the same pool that builds the others, so it inherits the entire middleware stack (retry, identity baggage, governance, telemetry, compaction) for free, and then you hand it to the Group Chat builder as one more participant. The collaboration's natural-language coordination from Chapter 9 absorbs the newcomer without special wiring; the manager simply has another voice in the room.</p>
+        <p>Adding an agent is fairly simple. You build it through the same pool (<code>AgentPool</code>) that builds the others, so it inherits the entire middleware stack (retry, identity baggage, governance, telemetry, compaction) for free, and then you add it where it needs to be, in the agent call order, to the Group Chat builder. The collaboration's natural-language coordination from Chapter 9 absorbs the newcomer without special wiring. The manager simply has another participant to orchestrate.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">// New agent: built by the same pool, so it gets the full middleware chain for free.
 var factCheckAgent = agentPool.Build("FactCheckAgent", factCheckInstructions);
@@ -98,7 +98,7 @@ var workflow = AgentWorkflowBuilder
     .AddParticipants(researchAgent, generatorAgent, reviewerAgent, factCheckAgent)
     .Build();</code></pre>
       <div class="prose">
-        <p>A new tool is just as contained. Because tools live behind the MCP boundary, you add one by writing a method on the tool server and marking it, and every agent that's allowed to see it can call it through the same protocol. The agents don't change; their menu of capabilities does. And when a capability is substantial in its own right (say, analytics over a warehouse), you don't have to cram it into the existing server at all. You can stand up a separate data agent (for example, a Microsoft Fabric data agent) that exposes its own MCP endpoint, and point a client at it exactly the way Chapter 7 connected to the first one. The protocol boundary makes "another tool" and "another whole tool service" the same shape of change.</p>
+        <p>A new tool is just as contained. Because tools live behind the MCP boundary, you add one by writing a method on the tool server and marking it, and every agent that's allowed to see it can call it through the same protocol. The agents don't change. Their menu of capabilities does. And when a capability is substantial in its own right (say, analytics over a warehouse), you don't have to cram it into the existing server at all. You can stand up a separate data agent (for example, a Microsoft Fabric data agent) that exposes its own MCP endpoint, and point a client at it exactly the way Chapter 7 connected to the first one. The protocol boundary makes "another tool" and "another whole tool service" the same shape of change.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">// New tool: one annotated method on the tool server; agents reach it over MCP unchanged.
 [McpServerTool, Description("Look up the canonical record for a given identifier.")]
@@ -107,14 +107,14 @@ public Task&lt;string&gt; LookupRecordAsync(string identifier) =&gt;
     </section>
     <hr class="section-divider">
 
-    <section class="chapter-section">
+    <section class="chapter-section binary-fade">
       <header class="section-heading">
         <span class="eyebrow">New Engines, New Doors</span>
         <h2>Swapping Backends and Triggers</h2>
         <p class="section-subhead">Change what powers an agent, or change what wakes the system up, without touching the loop in between.</p>
       </header>
       <div class="prose">
-        <p>The agents are coded against an abstraction, not a specific model host, so swapping in a different backend is a composition-root change rather than a rewrite. A hosted agent defined in Azure AI Foundry, for instance, comes in through <code>AIProjectClient.AsAIAgent(...)</code> against an agent reference, and then flows through the very same middleware extensions as a locally constructed agent. The collaboration loop never learns whether a participant is backed by a direct model client or a Foundry-hosted definition; it just sees an agent.</p>
+        <p>The agents are coded against an abstraction, not a specific model host, so swapping in a different backend is a composition-root change rather than a rewrite. A hosted agent defined in Azure AI Foundry, for instance, comes in through <code>AIProjectClient.AsAIAgent(...)</code> against an agent reference, and then flows through the very same middleware extensions as a locally constructed agent. The collaboration loop never learns whether a participant is backed by a direct model client or a Foundry-hosted definition. It just sees an agent.</p>
       </div>
       <pre class="codeblock"><code class="language-csharp">// Swap the engine: a Foundry-hosted agent, wrapped in the identical middleware chain.
 var hosted = projectClient
@@ -125,19 +125,19 @@ var hosted = projectClient
     .WithOpenTelemetry()
     .Build();</code></pre>
       <div class="prose">
-        <p>Changing how the system is triggered is the other big lever, and it lives at the front of the intake graph. The reference system is woken by an operator submitting events through a conversational front door, but nothing downstream depends on that. You could replace it with a continuous scanner that watches a feed and emits the same normalized events, and the intake workflow, the bridge, and the processing stage wouldn't notice. Similarly, the storage-bridge dispatch from Chapter 8 was deliberately built so the polling mechanism could be swapped for a managed queue (Azure Event Grid or Azure Service Bus) when you outgrow polling. In every case the bridge absorbs the change: a new trigger produces the same work, a new dispatcher moves the same work, and the autonomous middle stays put.</p>
+        <p>Changing how the system is triggered is the other big lever that lives at the front of the intake graph. The reference system is woken by an operator submitting events through a conversational front door, but nothing downstream depends on that. You could replace it with a continuous scanner that watches a feed and emits the same normalized events, and the intake workflow, the bridge, and the processing stage wouldn't notice. Similarly, the storage-bridge dispatch from Chapter 8 was deliberately built so the polling mechanism could be swapped for a managed queue (Azure Event Grid or Azure Service Bus) when you outgrow polling. In every case the bridge absorbs the change: a new trigger produces the same work, a new dispatcher moves the same work, and the autonomous middle stays put.</p>
       </div>
       <div class="card-grid">
         <div class="info-card">
-          <h3>New trigger</h3>
+          <h3>New Trigger</h3>
           <p>Replace the conversational front door with a continuous scanner or scheduled job that emits the same normalized events. Intake onward is unaffected.</p>
         </div>
         <div class="info-card">
-          <h3>New dispatch</h3>
+          <h3>New Dispatch</h3>
           <p>Swap the blob-polling bridge for Event Grid or Service Bus when scale demands it. The claim-and-process contract stays the same.</p>
         </div>
         <div class="info-card">
-          <h3>New backend</h3>
+          <h3>New Backend</h3>
           <p>Bring agents from a different host (a Foundry-defined agent) in through the same builder, wrapped in the same middleware.</p>
         </div>
       </div>
@@ -171,8 +171,8 @@ public static class BudgetGuardExtensions
         b.Use(inner =&gt; new BudgetGuardChatClient(inner, budget));
 }</code></pre>
       <div class="prose">
-        <p>So the system extends in five congruent ways, and all of them are additions at a boundary rather than surgery on the core: a participant at the composition root, a capability at the protocol boundary, a dispatcher at the storage bridge, a trigger at the head of the graph, and a concern in the middleware chain. If you internalize just one thing from this chapter, let it be that the cost of extension is set long before you extend, by how cleanly you drew your seams.</p>
-        <p>There's one practical question left that we've been gesturing at the whole time: how do you actually run this, on a laptop and in the cloud, without maintaining two different versions of the truth? That's deployment, and it's the next chapter.</p>
+        <p>So the system extends in five congruent ways, and all of them are additions at a boundary rather than surgery on the core: a participant at the composition root, a capability at the protocol boundary, a dispatcher at the storage bridge, a trigger at the head of the graph, and a concern in the middleware chain. If you internalize just one thing from this chapter, let it be that the cost of extension is set long before you extend, by how cleanly you drew your bridges.</p>
+        <p>There's one practical question left that we've been gesturing at the whole time: how do you actually run this, on a laptop and in the cloud, without maintaining two different versions of the truth? Let's move on to find out!</p>
       </div>
     </section>
   </main>
